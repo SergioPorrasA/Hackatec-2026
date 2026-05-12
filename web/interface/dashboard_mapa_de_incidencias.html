@@ -190,12 +190,12 @@
     </header>
     <!-- MAIN CONTENT CANVAS -->
     <main class="pl-[280px] pt-16 min-h-screen bg-background">
-      <div class="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
+      <div class="flex flex-col lg:flex-row min-h-[calc(100vh-64px)]">
         <!-- MAP CONTAINER -->
-        <section class="flex-1 relative bg-surface-container overflow-hidden">
+        <section class="flex-1 relative bg-surface-container overflow-hidden h-[calc(100vh-64px)]">
           <div id="incidenciasMap" aria-label="Mapa en tiempo real de incidencias"></div>
           <!-- Floating Map Controls -->
-          <div class="absolute top-stack-lg left-stack-lg z-10 flex flex-col gap-2">
+          <div class="absolute top-stack-lg left-stack-lg z-10 flex flex- col gap-2">
             <div class="bg-surface p-2 rounded-lg shadow-sm border border-outline-variant flex flex-col gap-1">
               <button id="zoomInBtn"
                 class="material-symbols-outlined p-1 hover:bg-surface-container-high rounded text-on-surface-variant"
@@ -236,81 +236,70 @@
               </div>
             </div>
           </div>
-        </section>
-        <!-- RIGHT PANEL (METRICS & ALERTS) -->
-        <aside
-          class="w-full lg:w-[400px] bg-surface border-l border-outline-variant flex flex-col p-stack-lg gap-stack-lg overflow-y-auto">
-          <!-- Quick Stats Bento Grid -->
-          <div class="grid grid-cols-2 gap-stack-sm">
-            <div class="col-span-2 bg-primary-container/5 border border-primary-container/10 p-stack-md rounded-xl">
-              <p class="font-label-md text-primary-container text-[11px] uppercase tracking-wider mb-1">Total de baches
-                activos</p>
-              <div class="flex items-baseline gap-2">
-                <h2 class="font-h1 text-h1 text-primary-container"><span id="totalReports">—</span></h2>
-                <span class="text-error font-label-md text-[12px] flex items-center"><span
-                    class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> <span
-                    id="reportsDelta">+0%</span></span>
+          <!-- Floating Metrics Card (overlay) -->
+          <aside
+            class="fixed w-80 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant p-stack-lg pointer-events-auto"
+            style="top:88px; right:32px; max-height: calc(100vh - 120px); overflow:auto; z-index:9999;">
+            <div class="grid grid-cols-2 gap-stack-sm">
+              <div class="col-span-2 bg-primary-container/5 border border-primary-container/10 p-stack-md rounded-xl">
+                <p class="font-label-md text-primary-container text-[11px] uppercase tracking-wider mb-1">Total de
+                  baches
+                  activos</p>
+                <div class="flex items-baseline gap-2">
+                  <h2 class="font-h1 text-h1 text-primary-container"><span id="totalReports">—</span></h2>
+                  <span class="text-error font-label-md text-[12px] flex items-center"><span
+                      class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> <span
+                      id="reportsDelta">+0%</span></span>
+                </div>
+              </div>
+              <div
+                class="bg-surface-container-low border border-outline-variant p-stack-md rounded-xl border-t-4 border-t-error">
+                <p class="font-label-md text-on-surface-variant text-[10px] uppercase mb-1">Baches críticos</p>
+                <h3 class="font-h2 text-h2 text-error"><span id="criticalCount">—</span></h3>
+              </div>
+              <div
+                class="bg-surface-container-low border border-outline-variant p-stack-md rounded-xl border-t-4 border-t-tertiary">
+                <h3 class="font-h2 text-h2 text-tertiary"><span id="inCourseCount">—</span></h3>
+                <p class="font-label-md text-on-surface-variant text-[10px] uppercase mt-1">En curso</p>
               </div>
             </div>
-            <div
-              class="bg-surface-container-low border border-outline-variant p-stack-md rounded-xl border-t-4 border-t-error">
-              <p class="font-label-md text-on-surface-variant text-[10px] uppercase mb-1">Baches críticos</p>
-              <h3 class="font-h2 text-h2 text-error"><span id="criticalCount">—</span></h3>
-            </div>
-            <div
-              class="bg-surface-container-low border border-outline-variant p-stack-md rounded-xl border-t-4 border-t-tertiary">
-              <h3 class="font-h2 text-h2 text-tertiary"><span id="inCourseCount">—</span></h3>
-              <p class="font-label-md text-on-surface-variant text-[10px] uppercase mt-1">En curso</p>
-            </div>
-          </div>
-          <!-- Simbología -->
-          <div>
-            <div class="flex items-center justify-between mb-stack-md">
-              <h3 class="font-h3 text-h3 text-on-surface">Simbología</h3>
-            </div>
-            <div class="space-y-stack-md">
-              <div
-                class="flex items-center gap-3 p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl">
-                <span class="w-4 h-4 rounded-full bg-yellow-400 border border-yellow-500"></span>
-                <div>
+            <div class="mt-4">
+              <h3 class="font-h3 text-h3 text-on-surface mb-3">Simbología</h3>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3">
+                  <span class="w-4 h-4 rounded-full bg-yellow-400 border border-yellow-500"></span>
                   <p class="font-body-md">Prioridad Media</p>
                 </div>
-              </div>
-              <div
-                class="flex items-center gap-3 p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl">
-                <span class="w-4 h-4 rounded-full bg-emerald-600 border border-emerald-700"></span>
-                <div>
+                <div class="flex items-center gap-3">
+                  <span class="w-4 h-4 rounded-full bg-emerald-600 border border-emerald-700"></span>
                   <p class="font-body-md">Baja</p>
                 </div>
-              </div>
-              <div
-                class="flex items-center gap-3 p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl">
-                <span class="w-4 h-4 rounded-full bg-error border border-error/90"></span>
-                <div>
+                <div class="flex items-center gap-3">
+                  <span class="w-4 h-4 rounded-full bg-error border border-error/90"></span>
                   <p class="font-body-md">Crítico</p>
                 </div>
               </div>
             </div>
-          </div>
-          <!-- Monthly Goals Sparkline Placeholder -->
-          <div class="mt-auto pt-stack-lg border-t border-outline-variant">
-            <h4 class="font-label-md text-on-surface-variant mb-4 uppercase text-[10px] tracking-widest">Rendimiento
-              Mensual</h4>
-            <div class="flex items-end justify-between gap-1 h-12 mb-2">
-              <div class="w-full bg-primary-container/20 h-[40%] rounded-t-sm"></div>
-              <div class="w-full bg-primary-container/20 h-[60%] rounded-t-sm"></div>
-              <div class="w-full bg-primary-container/20 h-[55%] rounded-t-sm"></div>
-              <div class="w-full bg-primary-container/20 h-[80%] rounded-t-sm"></div>
-              <div class="w-full bg-primary-container/20 h-[70%] rounded-t-sm"></div>
-              <div class="w-full bg-primary h-full rounded-t-sm"></div>
-              <div class="w-full bg-primary-container/20 h-[65%] rounded-t-sm"></div>
+            <div class="mt-6 pt-4 border-t border-outline-variant">
+              <h4 class="font-label-md text-on-surface-variant mb-2 uppercase text-[10px] tracking-widest">Rendimiento
+                Mensual</h4>
+              <div class="flex items-end justify-between gap-1 h-12 mb-2">
+                <div class="w-full bg-primary-container/20 h-[40%] rounded-t-sm"></div>
+                <div class="w-full bg-primary-container/20 h-[60%] rounded-t-sm"></div>
+                <div class="w-full bg-primary-container/20 h-[55%] rounded-t-sm"></div>
+                <div class="w-full bg-primary-container/20 h-[80%] rounded-t-sm"></div>
+                <div class="w-full bg-primary-container/20 h-[70%] rounded-t-sm"></div>
+                <div class="w-full bg-primary h-full rounded-t-sm"></div>
+                <div class="w-full bg-primary-container/20 h-[65%] rounded-t-sm"></div>
+              </div>
+              <div class="flex justify-between">
+                <p class="font-label-md text-[11px] text-on-surface">Meta: 500 baches/mes</p>
+                <p class="font-label-md text-[11px] text-primary">82% Progreso</p>
+              </div>
             </div>
-            <div class="flex justify-between">
-              <p class="font-label-md text-[11px] text-on-surface">Meta: 500 baches/mes</p>
-              <p class="font-label-md text-[11px] text-primary">82% Progreso</p>
-            </div>
-          </div>
-        </aside>
+          </aside>
+        </section>
+
       </div>
     </main>
     <footer class="ml-[280px] bg-[#6b1834] text-white">
