@@ -45,6 +45,7 @@ const reportSchema = new mongoose.Schema(
       lng: { type: Number, required: true },
     },
     userName: { type: String, default: 'Ciudadano' },
+    userPhone: { type: String, default: '' },
     status: {
       type: String,
       enum: ['Enviado', 'En Revisión', 'Finalizado'],
@@ -65,14 +66,32 @@ const feedPostSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     locationText: { type: String, required: true },
+    locationLat: { type: Number },
+    locationLng: { type: Number },
+    updatedReportCount: { type: Number, default: 0 },
+    updatedReportIds: [{ type: String }],
     imageUrls: [{ type: String }],
     createdBy: { type: String, default: 'Administrador' },
   },
   { timestamps: true }
 );
 
+const notificationSchema = new mongoose.Schema(
+  {
+    notificationId: { type: String, unique: true, index: true },
+    userPhone: { type: String, index: true },
+    reportId: { type: String, index: true },
+    title: { type: String, required: true },
+    message: { type: String, required: true },
+    reportStatus: { type: String, required: true },
+    readAt: { type: Date, default: null },
+  },
+  { timestamps: true }
+);
+
 const Report = mongoose.model('Report', reportSchema);
 const FeedPost = mongoose.model('FeedPost', feedPostSchema);
+const Notification = mongoose.model('Notification', notificationSchema);
 
 const validStatuses = ['Enviado', 'En Revisión', 'Finalizado'];
 
@@ -98,6 +117,7 @@ function reportToClient(doc) {
     location: doc.locationText,
     coordinates: doc.coordinates,
     userName: doc.userName,
+    userPhone: doc.userPhone,
     status: doc.status,
     priority: doc.priority,
     createdAt: doc.createdAt,
@@ -110,6 +130,45 @@ function getRiskByCount(count) {
   if (count > 10) return { label: 'Alerta roja', level: 'red', color: '#C62828' };
   if (count >= 5) return { label: 'Alerta amarilla', level: 'yellow', color: '#F9A825' };
   return { label: 'Baja incidencia', level: 'low', color: '#2E7D32' };
+}
+
+function haversineDistanceMeters(lat1, lng1, lat2, lng2) {
+  const toRadians = (value) => (value * Math.PI) / 180;
+  const earthRadius = 6371000;
+  const deltaLat = toRadians(lat2 - lat1);
+  const deltaLng = toRadians(lng2 - lng1);
+  const a = Math.sin(deltaLat / 2) ** 2
+    + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(deltaLng / 2) ** 2;
+  return 2 * earthRadius * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+async function createStatusNotification(report, status) {
+  if (!report || !report.userPhone) {
+    return null;
+  }
+
+  return Notification.create({
+    notificationId: `NTF-${Date.now()}-${report.reportId}-${status}`,
+    userPhone: report.userPhone,
+    reportId: report.reportId,
+    title: 'Seguimiento de tu reporte',
+    message: `Tu reporte ${report.reportId} ahora está en estado ${status}. El equipo municipal le dio seguimiento.`,
+    reportStatus: status,
+  });
+}
+
+async function findReportsInZone(lat, lng, radiusMeters = 180) {
+  const reports = await Report.find({ category: 'bache', status: { $ne: 'Finalizado' } }).lean();
+
+  return reports.filter((report) => {
+    const reportLat = report.coordinates?.lat;
+    const reportLng = report.coordinates?.lng;
+    if (typeof reportLat !== 'number' || typeof reportLng !== 'number') {
+      return false;
+    }
+
+    return haversineDistanceMeters(lat, lng, reportLat, reportLng) <= radiusMeters;
+  });
 }
 
 async function buildRiskZones() {
@@ -217,6 +276,7 @@ app.post('/reports', async (req, res) => {
     lat,
     lng,
     userName,
+    userPhone,
   } = req.body;
 
   const resolvedLocationText = locationText || location;
@@ -240,6 +300,7 @@ app.post('/reports', async (req, res) => {
       lng: Number(resolvedLng),
     },
     userName: userName || 'Ciudadano',
+    userPhone: String(userPhone || '').trim(),
   });
 
   return res.status(201).json(reportToClient(report));
@@ -264,6 +325,8 @@ app.patch('/reports/:id/status', authAdmin, async (req, res) => {
     return res.status(404).json({ message: 'Report not found' });
   }
 
+  await createStatusNotification(report, status);
+
   return res.json(reportToClient(report));
 });
 
@@ -277,11 +340,43 @@ app.get('/feed', async (_req, res) => {
   return res.json(posts);
 });
 
+app.get('/notifications', async (req, res) => {
+  const { phone } = req.query;
+
+  if (!phone) {
+    return res.status(400).json({ message: 'phone es requerido' });
+  }
+
+  const notifications = await Notification.find({ userPhone: String(phone).trim() })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return res.json(notifications);
+});
+
 app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
-  const { title, description, locationText, createdBy } = req.body;
+  const { title, description, locationText, locationLat, locationLng, createdBy } = req.body;
 
   if (!title || !description || !locationText) {
     return res.status(400).json({ message: 'title, description y locationText son requeridos' });
+  }
+
+  const parsedLat = locationLat != null && locationLat !== '' ? Number(locationLat) : null;
+  const parsedLng = locationLng != null && locationLng !== '' ? Number(locationLng) : null;
+  let updatedReportIds = [];
+
+  if (Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
+    const zoneReports = await findReportsInZone(parsedLat, parsedLng);
+    updatedReportIds = zoneReports.map((report) => report.reportId);
+
+    if (updatedReportIds.length > 0) {
+      await Report.updateMany(
+        { reportId: { $in: updatedReportIds } },
+        { $set: { status: 'Finalizado', updatedAt: new Date() } }
+      );
+
+      await Promise.all(zoneReports.map((report) => createStatusNotification(report, 'Finalizado')));
+    }
   }
 
   const uploadedPhotos = (req.files || []).map((file) => `/uploads/${file.filename}`);
@@ -295,6 +390,10 @@ app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
     title,
     description,
     locationText,
+    locationLat: Number.isFinite(parsedLat) ? parsedLat : undefined,
+    locationLng: Number.isFinite(parsedLng) ? parsedLng : undefined,
+    updatedReportCount: updatedReportIds.length,
+    updatedReportIds,
     imageUrls: [...uploadedPhotos, ...imageUrlsFromBody],
     createdBy: createdBy || 'Administrador',
   });

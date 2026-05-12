@@ -7,7 +7,9 @@ import 'package:geolocator/geolocator.dart';
 import '../services/api_service.dart';
 
 class ReportView extends StatefulWidget {
-  const ReportView({super.key});
+  const ReportView({super.key, required this.user});
+
+  final Map<String, dynamic> user;
 
   @override
   State<ReportView> createState() => _ReportViewState();
@@ -32,7 +34,8 @@ class _ReportViewState extends State<ReportView> {
       lat: lat,
       lng: lng,
       category: 'bache',
-      userName: 'Ciudadano',
+      userName: (widget.user['name'] as String?) ?? 'Ciudadano',
+      userPhone: (widget.user['phone'] as String?) ?? '',
     );
   }
 

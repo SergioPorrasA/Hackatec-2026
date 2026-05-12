@@ -1,19 +1,15 @@
-<!DOCTYPE html>
+cd<!DOCTYPE html>
 
 <html class="light" lang="es">
-
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
       rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
       rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-      rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -114,6 +110,118 @@
       body {
         font-family: 'Inter', sans-serif;
       }
+
+      .leaflet-container {
+        background: #f3f4f5;
+        border-radius: 8px;
+      }
+
+      .zone-map-shell {
+        border: 1px solid #ddbfc3;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .zone-map-layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr) 280px;
+        gap: 0;
+        min-height: 420px;
+      }
+
+      .zone-side-panel {
+        background: #f8f9fa;
+        border-right: 1px solid #e7e8e9;
+        padding: 20px;
+      }
+
+      .zone-side-panel.right-panel {
+        border-right: 0;
+        border-left: 1px solid #e7e8e9;
+      }
+
+      .zone-map-frame {
+        position: relative;
+        background: linear-gradient(180deg, #f8f9fa 0%, #f3f4f5 100%);
+      }
+
+      #zoneMap {
+        width: 100%;
+        height: 100%;
+        min-height: 420px;
+      }
+
+      .zone-arrow-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 9999px;
+        border: 1px solid #ddbfc3;
+        background: #fff;
+        color: #670024;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+      }
+
+      .zone-arrow-btn:hover {
+        background: #f8f2f4;
+        transform: translateY(-1px);
+      }
+
+      .zone-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 9999px;
+        background: #fff;
+        border: 1px solid #ddbfc3;
+        font-size: 12px;
+        font-weight: 600;
+        color: #670024;
+      }
+
+      .zone-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      .zone-table th,
+      .zone-table td {
+        padding: 10px 0;
+        border-bottom: 1px solid #e7e8e9;
+        text-align: left;
+      }
+
+      .zone-table th {
+        color: #574145;
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .zone-table td:last-child,
+      .zone-table th:last-child {
+        text-align: right;
+      }
+
+      @media (max-width: 1024px) {
+        .zone-map-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .zone-side-panel,
+        .zone-side-panel.right-panel {
+          border-left: 0;
+          border-right: 0;
+          border-bottom: 1px solid #e7e8e9;
+        }
+      }
     </style>
   </head>
 
@@ -193,11 +301,88 @@
         </div>
         <section id="feedAdminForm" class="hidden mb-gutter bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg">
           <h3 class="font-h3 text-h3 text-on-surface mb-stack-md">Publicar actualización</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+          <div class="grid grid-cols-1 gap-stack-md">
             <input id="feedTitle" class="border border-outline-variant rounded-lg px-3 py-2" placeholder="Título" />
-            <input id="feedLocation" class="border border-outline-variant rounded-lg px-3 py-2" placeholder="Ubicación" />
-            <textarea id="feedDescription" class="md:col-span-2 border border-outline-variant rounded-lg px-3 py-2" rows="3" placeholder="Descripción"></textarea>
-            <input id="feedPhotos" class="md:col-span-2" type="file" multiple accept="image/*" />
+
+            <!-- Sección de mapa por zonas -->
+            <div class="zone-map-shell">
+              <div class="flex items-center justify-between gap-stack-md px-4 py-3 border-b border-outline-variant bg-surface-container-lowest">
+                <div>
+                  <p class="font-label-md text-label-md text-primary uppercase tracking-wider">Distribución geográfica</p>
+                  <p class="font-body-md text-body-md text-on-surface-variant">Navega entre zonas prioritarias sin manipular el mapa.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button id="prevZoneBtn" type="button" class="zone-arrow-btn" aria-label="Zona anterior">
+                    <span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+                  </button>
+                  <button id="nextZoneBtn" type="button" class="zone-arrow-btn" aria-label="Zona siguiente">
+                    <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="zone-map-layout">
+                <aside class="zone-side-panel flex flex-col justify-between gap-4">
+                  <div>
+                    <span class="zone-pill mb-3">
+                      <span class="w-2 h-2 rounded-full bg-primary"></span>
+                      Zona activa
+                    </span>
+                    <h4 id="zoneName" class="font-h3 text-h3 text-on-surface mb-2">Cargando zonas...</h4>
+                    <p id="zoneRiskLabel" class="font-body-md text-body-md text-on-surface-variant mb-4">Obteniendo información de prioridad.</p>
+                  </div>
+
+                  <div class="space-y-3">
+                    <div class="bg-white rounded-xl border border-outline-variant p-3">
+                      <p class="font-label-md text-[11px] text-on-surface-variant uppercase tracking-wider mb-1">Baches activos</p>
+                      <p id="zoneTotalPotholes" class="font-h1 text-h1 text-primary">—</p>
+                    </div>
+                    <div class="bg-white rounded-xl border border-outline-variant p-3">
+                      <p class="font-label-md text-[11px] text-on-surface-variant uppercase tracking-wider mb-1">Ubicación de referencia</p>
+                      <p id="zoneReference" class="font-body-md text-body-md text-on-surface-variant">—</p>
+                    </div>
+                  </div>
+                </aside>
+
+                <div class="zone-map-frame">
+                  <div id="zoneMap"></div>
+                </div>
+
+                <aside class="zone-side-panel right-panel">
+                  <div class="mb-4">
+                    <p class="font-label-md text-label-md text-primary uppercase tracking-wider">Detalle de baches</p>
+                    <h4 class="font-h3 text-h3 text-on-surface">Resumen de la zona</h4>
+                  </div>
+
+                  <table class="zone-table" aria-label="Detalle informativo de baches por prioridad">
+                    <thead>
+                      <tr>
+                        <th>Prioridad</th>
+                        <th>Baches</th>
+                      </tr>
+                    </thead>
+                    <tbody id="zoneStatsTable">
+                      <tr>
+                        <td colspan="2" class="text-on-surface-variant py-4">Cargando información...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div class="mt-4 rounded-xl border border-outline-variant bg-white p-3">
+                    <p class="font-label-md text-[11px] text-on-surface-variant uppercase tracking-wider mb-1">Mapa fijo</p>
+                    <p class="font-body-md text-body-md text-on-surface-variant">El mapa no permite arrastre, zoom ni desplazamiento. Solo cambia con las flechas de zona.</p>
+                  </div>
+
+                  <input id="feedLocation" type="hidden" />
+                  <input id="feedLocationLat" type="hidden" />
+                  <input id="feedLocationLng" type="hidden" />
+                  <input id="feedZoneName" type="hidden" />
+                </aside>
+              </div>
+            </div>
+            
+            <textarea id="feedDescription" class="border border-outline-variant rounded-lg px-3 py-2" rows="3" placeholder="Descripción"></textarea>
+            <input id="feedPhotos" class="" type="file" multiple accept="image/*" />
           </div>
           <div class="mt-stack-md">
             <button id="publishFeedBtn" class="bg-primary text-white px-4 py-2 rounded-lg">Subir publicación</button>
@@ -476,14 +661,324 @@
         </div>
       </div>
     </footer>
+    <!-- Leaflet JS para mapas interactivos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
       const apiBase = 'http://localhost:3000';
+      const mapTilerKey = 'vho6orZjGT63tDnxKRLq';
       const feedGrid = document.getElementById('feedPostsGrid');
       const toggleFormBtn = document.getElementById('toggleFeedFormBtn');
       const form = document.getElementById('feedAdminForm');
+      const prevZoneBtn = document.getElementById('prevZoneBtn');
+      const nextZoneBtn = document.getElementById('nextZoneBtn');
+      const zoneNameEl = document.getElementById('zoneName');
+      const zoneRiskLabelEl = document.getElementById('zoneRiskLabel');
+      const zoneTotalPotholesEl = document.getElementById('zoneTotalPotholes');
+      const zoneReferenceEl = document.getElementById('zoneReference');
+      const zoneStatsTableEl = document.getElementById('zoneStatsTable');
+      const feedLocationInput = document.getElementById('feedLocation');
+      const feedZoneNameInput = document.getElementById('feedZoneName');
+      const feedLocationLatInput = document.getElementById('feedLocationLat');
+      const feedLocationLngInput = document.getElementById('feedLocationLng');
+
+      let zoneMap = null;
+      let zoneLayerGroup = null;
+      let zoneData = [];
+      let reportData = [];
+      let currentZoneIndex = 0;
+      let zoneDataLoaded = false;
+
+      const priorityPalette = {
+        Alta: '#ba1a1a',
+        Media: '#cba72f',
+        Baja: '#2e7d32'
+      };
+
+      const riskLabelByLevel = {
+        red: 'Alerta roja',
+        yellow: 'Alerta amarilla',
+        low: 'Baja incidencia'
+      };
 
       toggleFormBtn.addEventListener('click', () => {
         form.classList.toggle('hidden');
+        if (!form.classList.contains('hidden')) {
+          setTimeout(() => initializeZoneMap(), 100);
+        }
+      });
+
+      prevZoneBtn?.addEventListener('click', () => navigateZone(-1));
+      nextZoneBtn?.addEventListener('click', () => navigateZone(1));
+
+      async function getPlaceName(lat, lng) {
+        try {
+          const url = `https://api.maptiler.com/geocoding/${lng},${lat}.json?key=${mapTilerKey}`;
+          const response = await fetch(url);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.features && data.features.length > 0) {
+              return data.features[0].place_name;
+            }
+          }
+          return `Zona ${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+        } catch (e) {
+          console.error('Error obteniendo ubicación:', e);
+          return `Zona ${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+        }
+      }
+
+      function normalizePriority(priority) {
+        const value = String(priority || '').toLowerCase();
+        if (value.includes('alta')) return 'Alta';
+        if (value.includes('baja')) return 'Baja';
+        return 'Media';
+      }
+
+      function priorityColor(priority) {
+        return priorityPalette[normalizePriority(priority)] || priorityPalette.Media;
+      }
+
+      function haversineDistance(lat1, lng1, lat2, lng2) {
+        const toRad = (value) => (value * Math.PI) / 180;
+        const earthRadius = 6371000;
+        const dLat = toRad(lat2 - lat1);
+        const dLng = toRad(lng2 - lng1);
+        const a = Math.sin(dLat / 2) ** 2
+          + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+        return 2 * earthRadius * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+
+      function ensureZoneMap() {
+        if (zoneMap) return;
+
+        zoneMap = L.map('zoneMap', {
+          center: [17.0732, -96.7266],
+          zoom: 15,
+          maxZoom: 18,
+          minZoom: 12,
+          zoomControl: false,
+          dragging: false,
+          scrollWheelZoom: false,
+          doubleClickZoom: false,
+          boxZoom: false,
+          keyboard: false,
+          touchZoom: false,
+          tap: false
+        });
+
+        L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${mapTilerKey}`, {
+          tileSize: 256,
+          zoomOffset: 0,
+          minZoom: 0,
+          maxZoom: 20,
+          crossOrigin: true,
+          attribution:
+            '&copy; <a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+        }).addTo(zoneMap);
+
+        zoneLayerGroup = L.layerGroup().addTo(zoneMap);
+      }
+
+      function buildFallbackZones() {
+        return [{
+          id: 'fallback-zone',
+          point: { lat: 17.0732, lng: -96.7266 },
+          reports: reportData.length,
+          radius: 140,
+          label: 'Baja incidencia',
+          riskLevel: 'low',
+          color: '#2e7d32',
+          placeName: 'Centro de Oaxaca',
+          displayName: 'Centro de Oaxaca'
+        }];
+      }
+
+      function assignReportsToZones(zones, reports) {
+        const enrichedZones = zones.map((zone, index) => ({
+          ...zone,
+          displayIndex: index + 1,
+          displayName: zone.placeName || `Zona ${index + 1}`,
+          stats: {
+            total: 0,
+            priorities: { Alta: 0, Media: 0, Baja: 0 }
+          },
+          assignedReports: []
+        }));
+
+        if (!enrichedZones.length) {
+          return [];
+        }
+
+        reports.forEach((report) => {
+          if (typeof report.lat !== 'number' || typeof report.lng !== 'number') {
+            return;
+          }
+
+          let targetIndex = 0;
+          let targetDistance = Number.POSITIVE_INFINITY;
+
+          enrichedZones.forEach((zone, index) => {
+            const distance = haversineDistance(report.lat, report.lng, zone.point.lat, zone.point.lng);
+            if (distance <= (zone.radius || 0)) {
+              targetIndex = index;
+              targetDistance = distance;
+              return;
+            }
+            if (distance < targetDistance) {
+              targetIndex = index;
+              targetDistance = distance;
+            }
+          });
+
+          const selectedZone = enrichedZones[targetIndex];
+          const priority = normalizePriority(report.priority);
+          selectedZone.stats.total += 1;
+          selectedZone.stats.priorities[priority] += 1;
+          selectedZone.assignedReports.push(report);
+        });
+
+        return enrichedZones.sort((a, b) => b.stats.total - a.stats.total || a.displayIndex - b.displayIndex);
+      }
+
+      function updateZoneSummary(zone) {
+        const riskText = riskLabelByLevel[zone.riskLevel] || zone.label || 'Zona prioritaria';
+        zoneNameEl.textContent = zone.displayName || zone.placeName || `Zona ${currentZoneIndex + 1}`;
+        zoneRiskLabelEl.textContent = `${riskText} · ${zone.stats.total} baches activos`;
+        zoneTotalPotholesEl.textContent = zone.stats.total.toString();
+        zoneReferenceEl.textContent = `${zone.point.lat.toFixed(5)}, ${zone.point.lng.toFixed(5)}`;
+        feedLocationInput.value = zone.displayName || zone.placeName || zone.label || 'Zona prioritaria';
+        feedZoneNameInput.value = feedLocationInput.value;
+        feedLocationLatInput.value = zone.point.lat;
+        feedLocationLngInput.value = zone.point.lng;
+
+        const rows = [
+          { label: 'Total', value: zone.stats.total },
+          { label: 'Alta', value: zone.stats.priorities.Alta },
+          { label: 'Media', value: zone.stats.priorities.Media },
+          { label: 'Baja', value: zone.stats.priorities.Baja }
+        ];
+
+        zoneStatsTableEl.innerHTML = rows.map((row, index) => `
+          <tr>
+            <td class="${index === 0 ? 'font-semibold text-on-surface' : 'text-on-surface-variant'}">${row.label}</td>
+            <td class="${index === 0 ? 'font-semibold text-primary' : 'text-on-surface'}">${row.value}</td>
+          </tr>
+        `).join('');
+      }
+
+      function renderZoneMap(zone) {
+        ensureZoneMap();
+
+        if (zoneLayerGroup) {
+          zoneMap.removeLayer(zoneLayerGroup);
+        }
+
+        zoneLayerGroup = L.layerGroup().addTo(zoneMap);
+
+        zoneData.forEach((entry, index) => {
+          const isCurrent = index === currentZoneIndex;
+          const radius = typeof entry.radius === 'number' && entry.radius > 0 ? entry.radius : 140;
+
+          L.circle([entry.point.lat, entry.point.lng], {
+            radius,
+            color: entry.color,
+            fillColor: entry.color,
+            fillOpacity: isCurrent ? 0.28 : 0.14,
+            weight: isCurrent ? 3 : 2,
+            dashArray: isCurrent ? '' : '6 6'
+          }).addTo(zoneLayerGroup);
+        });
+
+        zone.assignedReports.forEach((report) => {
+          L.circleMarker([report.lat, report.lng], {
+            radius: 6,
+            color: '#ffffff',
+            weight: 2,
+            fillColor: priorityColor(report.priority),
+            fillOpacity: 0.96
+          }).addTo(zoneLayerGroup);
+        });
+
+        zoneMap.setView([zone.point.lat, zone.point.lng], 15);
+        setTimeout(() => zoneMap.invalidateSize(), 50);
+      }
+
+      function renderCurrentZone() {
+        if (!zoneData.length) return;
+
+        const safeIndex = Math.max(0, Math.min(currentZoneIndex, zoneData.length - 1));
+        currentZoneIndex = safeIndex;
+        const zone = zoneData[currentZoneIndex];
+
+        updateZoneSummary(zone);
+        renderZoneMap(zone);
+
+        const disabled = zoneData.length <= 1;
+        if (prevZoneBtn) prevZoneBtn.disabled = disabled;
+        if (nextZoneBtn) nextZoneBtn.disabled = disabled;
+        if (prevZoneBtn) prevZoneBtn.style.opacity = disabled ? '0.45' : '1';
+        if (nextZoneBtn) nextZoneBtn.style.opacity = disabled ? '0.45' : '1';
+      }
+
+      function navigateZone(step) {
+        if (!zoneData.length) return;
+        currentZoneIndex = (currentZoneIndex + step + zoneData.length) % zoneData.length;
+        renderCurrentZone();
+      }
+
+      async function loadZoneData() {
+        try {
+          const [reportsResponse, zonesResponse] = await Promise.all([
+            fetch(`${apiBase}/reports/map`),
+            fetch(`${apiBase}/risk-zones`)
+          ]);
+
+          reportData = reportsResponse.ok ? await reportsResponse.json() : [];
+          const zones = zonesResponse.ok ? await zonesResponse.json() : [];
+
+          const normalizedZones = zones.length ? zones : buildFallbackZones();
+          const enrichedZones = await Promise.all(
+            normalizedZones.map(async (zone, index) => {
+              const placeName = zone.placeName || await getPlaceName(zone.point.lat, zone.point.lng);
+              return {
+                ...zone,
+                placeName,
+                displayName: placeName || `Zona ${index + 1}`
+              };
+            })
+          );
+
+          zoneData = assignReportsToZones(enrichedZones, reportData);
+          zoneDataLoaded = true;
+          currentZoneIndex = Math.min(currentZoneIndex, zoneData.length - 1);
+          renderCurrentZone();
+        } catch (error) {
+          console.error('No se pudieron cargar las zonas del mapa:', error);
+          reportData = [];
+          zoneData = assignReportsToZones(buildFallbackZones(), reportData);
+          zoneDataLoaded = true;
+          currentZoneIndex = 0;
+          renderCurrentZone();
+        }
+      }
+
+      async function initializeZoneMap() {
+        ensureZoneMap();
+
+        if (!zoneDataLoaded) {
+          await loadZoneData();
+          return;
+        }
+
+        renderCurrentZone();
+        setTimeout(() => zoneMap.invalidateSize(), 100);
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        if (form && !form.classList.contains('hidden')) {
+          setTimeout(() => initializeZoneMap(), 500);
+        }
+        loadFeedPosts();
       });
 
       async function loadFeedPosts() {
@@ -501,6 +996,7 @@
               <span class="font-label-md text-label-md text-primary">${post.locationText || 'Sin ubicación'}</span>
               <h3 class="font-h3 text-h3 text-on-surface">${post.title || 'Sin título'}</h3>
               <p class="font-body-md text-body-md text-on-surface-variant">${post.description || ''}</p>
+              ${typeof post.updatedReportCount === 'number' ? `<p class="font-label-md text-[11px] text-on-surface-variant uppercase tracking-wider">${post.updatedReportCount} baches actualizados</p>` : ''}
               <div class="grid grid-cols-1 gap-2 mt-2">${images || '<div class="text-sm text-on-surface-variant">Sin imágenes</div>'}</div>
             </article>
           `;
@@ -509,13 +1005,29 @@
 
       document.getElementById('publishFeedBtn').addEventListener('click', async () => {
         const title = document.getElementById('feedTitle').value;
-        const locationText = document.getElementById('feedLocation').value;
+        const locationText = feedLocationInput.value;
+        const locationLat = feedLocationLatInput.value;
+        const locationLng = feedLocationLngInput.value;
         const description = document.getElementById('feedDescription').value;
         const files = document.getElementById('feedPhotos').files;
+
+        if (!locationText || !locationLat || !locationLng) {
+          alert('Por favor, selecciona una zona antes de publicar.');
+          return;
+        }
+
+        if (!title || !description) {
+          alert('Por favor, completa el título y la descripción.');
+          return;
+        }
 
         const formData = new FormData();
         formData.append('title', title);
         formData.append('locationText', locationText);
+        formData.append('lat', locationLat);
+        formData.append('lng', locationLng);
+        formData.append('locationLat', locationLat);
+        formData.append('locationLng', locationLng);
         formData.append('description', description);
 
         Array.from(files).forEach((file) => formData.append('photos', file));
@@ -530,15 +1042,16 @@
           return;
         }
 
+        const createdPost = await response.json();
+
         document.getElementById('feedTitle').value = '';
-        document.getElementById('feedLocation').value = '';
         document.getElementById('feedDescription').value = '';
         document.getElementById('feedPhotos').value = '';
 
+        alert(`Publicación subida con éxito. Se actualizaron ${createdPost.updatedReportCount || 0} baches de la zona.`);
         await loadFeedPosts();
       });
 
-      loadFeedPosts();
     </script>
   </body>
 

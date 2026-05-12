@@ -77,15 +77,6 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   int _selectedIndex = 0;
 
-  final List<Widget> _views = [
-    const FeedView(),
-    const MapView(),
-    const ReportView(),
-    const StatusView(),
-    // ProfileView receives runtime data from the login gate.
-    const SizedBox.shrink(),
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -98,9 +89,18 @@ class _MainAppState extends State<MainApp> {
       user: widget.user,
       onLogout: widget.onLogout,
     );
+    final reportView = ReportView(user: widget.user);
+    final statusView = StatusView(userPhone: (widget.user['phone'] as String?) ?? '');
+    final views = [
+      const FeedView(),
+      const MapView(),
+      reportView,
+      statusView,
+      const SizedBox.shrink(),
+    ];
 
     return Scaffold(
-      body: _selectedIndex == 4 ? profileView : _views[_selectedIndex],
+      body: _selectedIndex == 4 ? profileView : views[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

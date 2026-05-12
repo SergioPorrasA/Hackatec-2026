@@ -89,6 +89,7 @@ class ApiService {
     required double lng,
     String category = 'bache',
     String userName = 'Ciudadano',
+    String userPhone = '',
   }) async {
     final response = await _postWithFallback(
       '/reports',
@@ -101,6 +102,7 @@ class ApiService {
         'lat': lat,
         'lng': lng,
         'userName': userName,
+        'userPhone': userPhone,
       }),
     );
 
@@ -149,5 +151,21 @@ class ApiService {
     }
 
     return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  static Future<List<Map<String, dynamic>>> getNotifications({
+    required String phone,
+  }) async {
+    final response = await _getWithFallback(
+      '/notifications',
+      query: {'phone': phone},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('No se pudieron obtener notificaciones');
+    }
+
+    final data = jsonDecode(response.body) as List<dynamic>;
+    return data.cast<Map<String, dynamic>>();
   }
 }

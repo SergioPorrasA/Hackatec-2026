@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
 class StatusView extends StatefulWidget {
-  const StatusView({super.key});
+  const StatusView({super.key, required this.userPhone});
+
+  final String userPhone;
 
   @override
   State<StatusView> createState() => _StatusViewState();
@@ -13,6 +15,7 @@ class _StatusViewState extends State<StatusView> {
   final List<String> _filters = ['Todos', 'Enviados', 'En Revisión', 'Finalizados'];
 
   List<Map<String, String>> _reports = [];
+  List<Map<String, dynamic>> _notifications = [];
   bool _loading = true;
 
   @override
@@ -23,7 +26,12 @@ class _StatusViewState extends State<StatusView> {
 
   Future<void> _loadReports() async {
     try {
-      final reports = await ApiService.getReports();
+      final results = await Future.wait([
+        ApiService.getReports(),
+        ApiService.getNotifications(phone: widget.userPhone),
+      ]);
+      final reports = results[0];
+      final notifications = results[1];
       if (!mounted) return;
 
       setState(() {
@@ -37,6 +45,7 @@ class _StatusViewState extends State<StatusView> {
             'status': (item['status'] as String?) ?? 'Enviado',
           };
         }).toList();
+        _notifications = notifications;
         _loading = false;
       });
     } catch (_) {
@@ -92,6 +101,18 @@ class _StatusViewState extends State<StatusView> {
                 'Las tarjetas muestran cada incidencia para que no se pierda el seguimiento.',
                 style: TextStyle(color: Colors.grey[600]),
               ),
+              const SizedBox(height: 16),
+              if (_notifications.isNotEmpty) ...[
+                _buildSectionHeader('Notificaciones recientes'),
+                const SizedBox(height: 12),
+                ..._notifications.map((notification) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildNotificationCard(notification),
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
               const SizedBox(height: 24),
               SizedBox(
                 height: 50,
@@ -145,6 +166,56 @@ class _StatusViewState extends State<StatusView> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF670024),
+      ),
+    );
+  }
+
+  Widget _buildNotificationCard(Map<String, dynamic> notification) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAF5F7),
+        border: Border.all(color: const Color(0xFFDBC0C7)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.notifications_active, color: Color(0xFF670024)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  (notification['title'] as String?) ?? 'Seguimiento de reporte',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  (notification['message'] as String?) ?? '',
+                  style: TextStyle(color: Colors.grey[700], height: 1.3),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Estado: ${(notification['reportStatus'] as String?) ?? 'Actualizado'}',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF670024), fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
