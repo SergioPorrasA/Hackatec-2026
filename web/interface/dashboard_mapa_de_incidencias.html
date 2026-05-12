@@ -195,7 +195,7 @@
         <section class="flex-1 relative bg-surface-container overflow-hidden h-[calc(100vh-64px)]">
           <div id="incidenciasMap" aria-label="Mapa en tiempo real de incidencias"></div>
           <!-- Floating Map Controls -->
-          <div class="absolute top-stack-lg left-stack-lg z-10 flex flex- col gap-2">
+          <div class="absolute top-stack-lg left-stack-lg z-10 flex flex-col gap-2">
             <div class="bg-surface p-2 rounded-lg shadow-sm border border-outline-variant flex flex-col gap-1">
               <button id="zoomInBtn"
                 class="material-symbols-outlined p-1 hover:bg-surface-container-high rounded text-on-surface-variant"
@@ -387,7 +387,10 @@
       const map = L.map('incidenciasMap', {
         zoomControl: false,
         minZoom: 3,
-        maxZoom: 20
+        maxZoom: 20,
+        zoomAnimation: false,
+        fadeAnimation: false,
+        markerZoomAnimation: false
       }).setView([17.0732, -96.7266], 16);
 
       const mapTilerKey = 'vho6orZjGT63tDnxKRLq';
@@ -397,6 +400,34 @@
       }).addTo(map);
 
       const apiBase = 'http://localhost:3000';
+
+      async function reverseGeocode(lat, lng) {
+        const url = `https://api.maptiler.com/geocoding/${lng},${lat}.json?key=${mapTilerKey}&language=es&types=address,street,locality,municipality`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Reverse geocoding falló (${response.status})`);
+        }
+
+        const data = await response.json();
+        const feature = data.features?.[0];
+        if (!feature) {
+          return {
+            street: 'Calle no disponible',
+            city: 'Ciudad no disponible'
+          };
+        }
+
+        const ctx = feature.context || [];
+        const getFromContext = (prefixes) => {
+          const item = ctx.find((c) => prefixes.some((prefix) => c.id?.startsWith(prefix)));
+          return item?.text_es || item?.text || null;
+        };
+
+        const street = feature.text_es || feature.text || getFromContext(['street', 'address']) || 'Calle no disponible';
+        const city = getFromContext(['locality', 'municipality', 'place']) || 'Ciudad no disponible';
+
+        return { street, city };
+      }
 
       const statusColor = {
         critico: '#ba1a1a',
@@ -489,6 +520,29 @@
 
       zoomInBtn.addEventListener('click', () => map.zoomIn());
       zoomOutBtn.addEventListener('click', () => map.zoomOut());
+      map.on('click', async (event) => {
+        const { lat, lng } = event.latlng;
+        const loadingPopup = L.popup({ autoPan: true })
+          .setLatLng(event.latlng)
+          .setContent('Buscando dirección...')
+          .openOn(map);
+
+        try {
+          const place = await reverseGeocode(lat, lng);
+          loadingPopup.setContent(`
+            <div style="font-family: Inter, sans-serif; min-width: 220px;">
+              <p style="margin: 0 0 4px; font-size: 11px; color: #574145; text-transform: uppercase; letter-spacing: .05em;">Ubicación seleccionada</p>
+              <p style="margin: 0 0 6px; font-size: 14px; font-weight: 600; color: #191c1d;">${place.street}</p>
+              <p style="margin: 0 0 8px; font-size: 12px; color: #5e5e5e;">${place.city}</p>
+              <p style="margin: 0; font-size: 11px; color: #8a7174;">${lat.toFixed(5)}, ${lng.toFixed(5)}</p>
+            </div>
+          `);
+        } catch (error) {
+          loadingPopup.setContent('No se pudo obtener calle y ciudad para este punto.');
+          console.error('Error en reverse geocoding:', error);
+        }
+      });
+
       locateBtn.addEventListener('click', () => {
         if (userMarker) {
           map.setView(userMarker.getLatLng(), Math.max(map.getZoom(), 16));
