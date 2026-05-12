@@ -202,7 +202,7 @@ async function buildRiskZones() {
     const label = getZoneLabelForReport(report);
 
     // Track sum of lat/lng and count so we can compute centroid of reports.
-    const current = buckets.get(key) || { latSum: 0, lngSum: 0, count: 0, label };
+    const current = buckets.get(key) || { key, latSum: 0, lngSum: 0, count: 0, label };
     current.latSum += lat;
     current.lngSum += lng;
     current.count += 1;
@@ -374,7 +374,17 @@ app.get('/notifications', async (req, res) => {
 });
 
 app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
-  const { title, description, locationText, locationLat, locationLng, createdBy } = req.body;
+  const {
+    title,
+    description,
+    locationText,
+    locationLat,
+    locationLng,
+    zoneKey,
+    zoneLabel,
+    reportIds,
+    createdBy,
+  } = req.body;
 
   if (!title || !description || !locationText) {
     return res.status(400).json({ message: 'title, description y locationText son requeridos' });
@@ -382,23 +392,57 @@ app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
 
   const parsedLat = locationLat != null && locationLat !== '' ? Number(locationLat) : null;
   const parsedLng = locationLng != null && locationLng !== '' ? Number(locationLng) : null;
-  const feedZoneKey = Number.isFinite(parsedLat) && Number.isFinite(parsedLng)
-    ? getZoneKeyFromCoordinates(parsedLat, parsedLng)
-    : '';
+  const feedZoneKey = String(zoneKey || '').trim() || (
+    Number.isFinite(parsedLat) && Number.isFinite(parsedLng)
+      ? getZoneKeyFromCoordinates(parsedLat, parsedLng)
+      : ''
+  );
+  const feedZoneLabel = String(zoneLabel || locationText || '').trim();
   let updatedReportIds = [];
 
-  if (Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
+  const parsedReportIds = String(reportIds || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (parsedReportIds.length > 0) {
+    const existingReports = await Report.find({
+      category: 'bache',
+      status: { $ne: 'Finalizado' },
+      reportId: { $in: parsedReportIds },
+    }).lean();
+    updatedReportIds = existingReports.map((report) => report.reportId);
+  }
+
+  if (updatedReportIds.length === 0 && feedZoneKey) {
+    const zoneReports = await Report.find({
+      category: 'bache',
+      status: { $ne: 'Finalizado' },
+      zoneKey: feedZoneKey,
+    }).lean();
+    updatedReportIds = zoneReports.map((report) => report.reportId);
+  }
+
+  if (updatedReportIds.length === 0 && Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
     const zoneReports = await findReportsInZone(parsedLat, parsedLng);
     updatedReportIds = zoneReports.map((report) => report.reportId);
+  }
 
-    if (updatedReportIds.length > 0) {
-      await Report.updateMany(
-        { reportId: { $in: updatedReportIds } },
-        { $set: { status: 'Finalizado', updatedAt: new Date(), zoneKey: feedZoneKey, zoneLabel: locationText } }
-      );
+  if (updatedReportIds.length > 0) {
+    await Report.updateMany(
+      { reportId: { $in: updatedReportIds } },
+      {
+        $set: {
+          status: 'Finalizado',
+          updatedAt: new Date(),
+          zoneKey: feedZoneKey,
+          zoneLabel: feedZoneLabel,
+        },
+      }
+    );
 
-      await Promise.all(zoneReports.map((report) => createStatusNotification(report, 'Finalizado')));
-    }
+    const updatedReports = await Report.find({ reportId: { $in: updatedReportIds } }).lean();
+    await Promise.all(updatedReports.map((report) => createStatusNotification(report, 'Finalizado')));
   }
 
   const uploadedPhotos = (req.files || []).map((file) => `/uploads/${file.filename}`);
@@ -413,7 +457,7 @@ app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
     description,
     locationText,
     zoneKey: feedZoneKey,
-    zoneLabel: locationText,
+    zoneLabel: feedZoneLabel,
     locationLat: Number.isFinite(parsedLat) ? parsedLat : undefined,
     locationLng: Number.isFinite(parsedLng) ? parsedLng : undefined,
     updatedReportCount: updatedReportIds.length,

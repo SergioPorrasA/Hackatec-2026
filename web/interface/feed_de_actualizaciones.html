@@ -377,6 +377,8 @@ cd<!DOCTYPE html>
                   <input id="feedLocationLat" type="hidden" />
                   <input id="feedLocationLng" type="hidden" />
                   <input id="feedZoneName" type="hidden" />
+                  <input id="feedZoneKey" type="hidden" />
+                  <input id="feedReportIds" type="hidden" />
                 </aside>
               </div>
             </div>
@@ -680,6 +682,8 @@ cd<!DOCTYPE html>
       const feedZoneNameInput = document.getElementById('feedZoneName');
       const feedLocationLatInput = document.getElementById('feedLocationLat');
       const feedLocationLngInput = document.getElementById('feedLocationLng');
+      const feedZoneKeyInput = document.getElementById('feedZoneKey');
+      const feedReportIdsInput = document.getElementById('feedReportIds');
 
       let zoneMap = null;
       let zoneLayerGroup = null;
@@ -850,6 +854,11 @@ cd<!DOCTYPE html>
         feedZoneNameInput.value = feedLocationInput.value;
         feedLocationLatInput.value = zone.point.lat;
         feedLocationLngInput.value = zone.point.lng;
+        feedZoneKeyInput.value = zone.key || '';
+        feedReportIdsInput.value = (zone.assignedReports || [])
+          .map((report) => report.id)
+          .filter(Boolean)
+          .join(',');
 
         const rows = [
           { label: 'Total', value: zone.stats.total },
@@ -1008,6 +1017,8 @@ cd<!DOCTYPE html>
         const locationText = feedLocationInput.value;
         const locationLat = feedLocationLatInput.value;
         const locationLng = feedLocationLngInput.value;
+        const zoneKey = feedZoneKeyInput.value;
+        const reportIds = feedReportIdsInput.value;
         const description = document.getElementById('feedDescription').value;
         const files = document.getElementById('feedPhotos').files;
 
@@ -1028,6 +1039,9 @@ cd<!DOCTYPE html>
         formData.append('lng', locationLng);
         formData.append('locationLat', locationLat);
         formData.append('locationLng', locationLng);
+        formData.append('zoneKey', zoneKey);
+        formData.append('zoneLabel', locationText);
+        formData.append('reportIds', reportIds);
         formData.append('description', description);
 
         Array.from(files).forEach((file) => formData.append('photos', file));
