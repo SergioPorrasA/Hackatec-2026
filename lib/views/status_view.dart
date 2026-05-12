@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 class StatusView extends StatefulWidget {
   const StatusView({super.key});
@@ -11,43 +12,40 @@ class _StatusViewState extends State<StatusView> {
   int _selectedFilter = 0;
   final List<String> _filters = ['Todos', 'Enviados', 'En Revisión', 'Finalizados'];
 
-  final List<Map<String, String>> _reports = [
-    {
-      'id': '#OAX-2024-0891',
-      'title': 'Fuga de agua',
-      'location': 'Calle Macedonio Alcalá',
-      'date': '24 May 2024',
-      'status': 'Enviado',
-    },
-    {
-      'id': '#OAX-2024-0854',
-      'title': 'Bache',
-      'location': 'Colonia Reforma',
-      'date': '21 May 2024',
-      'status': 'En Revisión',
-    },
-    {
-      'id': '#OAX-2024-0722',
-      'title': 'Luminaria fundida',
-      'location': 'Parque El Llano',
-      'date': '15 May 2024',
-      'status': 'Finalizado',
-    },
-    {
-      'id': '#OAX-2024-0912',
-      'title': 'Recolección Basura',
-      'location': 'Centro Histórico',
-      'date': '26 May 2024',
-      'status': 'En Revisión',
-    },
-    {
-      'id': '#OAX-2024-0935',
-      'title': 'Poda de árboles',
-      'location': 'Avenida Juárez',
-      'date': '28 May 2024',
-      'status': 'Enviado',
-    },
-  ];
+  List<Map<String, String>> _reports = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReports();
+  }
+
+  Future<void> _loadReports() async {
+    try {
+      final reports = await ApiService.getReports();
+      if (!mounted) return;
+
+      setState(() {
+        _reports = reports.map((item) {
+          final createdAt = (item['createdAt'] as String?) ?? '';
+          return {
+            'id': '#${(item['id'] as String?) ?? 'SIN-ID'}',
+            'title': (item['title'] as String?) ?? 'Sin título',
+            'location': (item['location'] as String?) ?? 'Sin ubicación',
+            'date': createdAt.length >= 10 ? createdAt.substring(0, 10) : 'Sin fecha',
+            'status': (item['status'] as String?) ?? 'Enviado',
+          };
+        }).toList();
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,12 +126,22 @@ class _StatusViewState extends State<StatusView> {
                 ),
               ),
               const SizedBox(height: 24),
-              ..._reports.map((report) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildReportCard(report),
-                );
-              }),
+              if (_loading)
+                const Center(child: CircularProgressIndicator())
+              else
+                ..._reports
+                    .where((report) {
+                      if (_selectedFilter == 0) return true;
+                      if (_selectedFilter == 1) return report['status'] == 'Enviado';
+                      if (_selectedFilter == 2) return report['status'] == 'En Revisión';
+                      return report['status'] == 'Finalizado';
+                    })
+                    .map((report) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildReportCard(report),
+                      );
+                    }),
             ],
           ),
         ),

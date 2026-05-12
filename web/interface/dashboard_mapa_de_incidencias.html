@@ -432,32 +432,7 @@
         attribution: '&copy; OpenStreetMap contributors &copy; MapTiler'
       }).addTo(map);
 
-      const incidents = [
-        {
-          id: '#8821',
-          title: 'Socavón en Av. Independencia',
-          status: 'critico',
-          lat: 17.0650,
-          lng: -96.7224,
-          detail: 'ALTA PRIORIDAD'
-        },
-        {
-          id: '#8834',
-          title: 'Bache reportado en Calzada Madero',
-          status: 'pendiente',
-          lat: 17.0754,
-          lng: -96.7177,
-          detail: 'EN VALIDACION'
-        },
-        {
-          id: '#8778',
-          title: 'Reparación completada en Col. Reforma',
-          status: 'reparado',
-          lat: 17.0832,
-          lng: -96.7302,
-          detail: 'CERRADO'
-        }
-      ];
+      const apiBase = 'http://localhost:3000';
 
       const statusColor = {
         critico: '#ba1a1a',
@@ -465,23 +440,55 @@
         reparado: '#059669'
       };
 
-      incidents.forEach((incident) => {
-        const marker = L.circleMarker([incident.lat, incident.lng], {
-          radius: 8,
-          color: '#ffffff',
-          weight: 2,
-          fillColor: statusColor[incident.status],
-          fillOpacity: 0.95
-        }).addTo(map);
+      async function loadMapData() {
+        try {
+          const [reportsResponse, zonesResponse] = await Promise.all([
+            fetch(`${apiBase}/reports/map`),
+            fetch(`${apiBase}/risk-zones`)
+          ]);
 
-        marker.bindPopup(`
-          <div style="font-family: Inter, sans-serif; min-width: 220px;">
-            <p style="margin: 0 0 6px; font-size: 11px; color: ${statusColor[incident.status]}; font-weight: 700;">${incident.id}</p>
-            <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #191c1d;">${incident.title}</p>
-            <span style="display:inline-block; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; background: #f3f4f5; color: #191c1d;">${incident.detail}</span>
-          </div>
-        `);
-      });
+          const reports = reportsResponse.ok ? await reportsResponse.json() : [];
+          const zones = zonesResponse.ok ? await zonesResponse.json() : [];
+
+          reports.forEach((incident) => {
+            const statusTag = incident.status === 'Finalizado'
+              ? 'reparado'
+              : incident.status === 'En Revisión'
+                ? 'pendiente'
+                : 'critico';
+
+            const marker = L.circleMarker([incident.lat, incident.lng], {
+              radius: 7,
+              color: '#ffffff',
+              weight: 2,
+              fillColor: statusColor[statusTag],
+              fillOpacity: 0.95
+            }).addTo(map);
+
+            marker.bindPopup(`
+              <div style="font-family: Inter, sans-serif; min-width: 220px;">
+                <p style="margin: 0 0 6px; font-size: 11px; color: ${statusColor[statusTag]}; font-weight: 700;">${incident.id}</p>
+                <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #191c1d;">${incident.title}</p>
+                <span style="display:inline-block; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; background: #f3f4f5; color: #191c1d;">${incident.status}</span>
+              </div>
+            `);
+          });
+
+          zones.forEach((zone) => {
+            L.circle([zone.point.lat, zone.point.lng], {
+              radius: 220,
+              color: zone.color,
+              fillColor: zone.color,
+              fillOpacity: 0.18,
+              weight: 2
+            }).addTo(map).bindPopup(`${zone.label} · ${zone.reports} reportes`);
+          });
+        } catch (error) {
+          console.error('No se pudo cargar información del mapa:', error);
+        }
+      }
+
+      loadMapData();
 
       const gpsStatus = document.getElementById('gpsStatus');
       const zoomInBtn = document.getElementById('zoomInBtn');

@@ -392,74 +392,7 @@
                 <th class="px-stack-lg py-4 font-label-md text-label-md text-on-surface-variant">ACCIONES</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-outline-variant">
-              <tr class="hover:bg-surface-container-lowest transition-colors">
-                <td class="px-stack-lg py-4 font-data-mono text-data-mono">#OXA-29381</td>
-                <td class="px-stack-lg py-4">
-                  <p class="font-body-md font-semibold">Av. Independencia 405</p>
-                  <p class="text-[12px] text-on-surface-variant">Centro Histórico</p>
-                </td>
-                <td class="px-stack-lg py-4">
-                  <span
-                    class="bg-error-container text-on-error-container px-3 py-1 rounded-full text-[11px] font-bold">ALTA</span>
-                </td>
-                <td class="px-stack-lg py-4">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-primary"></span>
-                    <span class="font-label-md text-label-md">En Proceso</span>
-                  </div>
-                </td>
-                <td class="px-stack-lg py-4 font-body-md text-on-surface-variant">Cuadrilla Alfa-4</td>
-                <td class="px-stack-lg py-4">
-                  <span
-                    class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">visibility</span>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-lowest transition-colors">
-                <td class="px-stack-lg py-4 font-data-mono text-data-mono">#OXA-29402</td>
-                <td class="px-stack-lg py-4">
-                  <p class="font-body-md font-semibold">Calle Macedonio Alcalá</p>
-                  <p class="text-[12px] text-on-surface-variant">Zona Turística</p>
-                </td>
-                <td class="px-stack-lg py-4">
-                  <span
-                    class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full text-[11px] font-bold">MEDIA</span>
-                </td>
-                <td class="px-stack-lg py-4">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-tertiary"></span>
-                    <span class="font-label-md text-label-md">Programado</span>
-                  </div>
-                </td>
-                <td class="px-stack-lg py-4 font-body-md text-on-surface-variant">Mantenimiento Vial</td>
-                <td class="px-stack-lg py-4">
-                  <span
-                    class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">visibility</span>
-                </td>
-              </tr>
-              <tr class="hover:bg-surface-container-lowest transition-colors">
-                <td class="px-stack-lg py-4 font-data-mono text-data-mono">#OXA-29415</td>
-                <td class="px-stack-lg py-4">
-                  <p class="font-body-md font-semibold">Calz. Porfirio Díaz</p>
-                  <p class="text-[12px] text-on-surface-variant">Col. Reforma</p>
-                </td>
-                <td class="px-stack-lg py-4">
-                  <span
-                    class="bg-surface-container-highest text-on-surface-variant px-3 py-1 rounded-full text-[11px] font-bold">BAJA</span>
-                </td>
-                <td class="px-stack-lg py-4">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-secondary"></span>
-                    <span class="font-label-md text-label-md">Completado</span>
-                  </div>
-                </td>
-                <td class="px-stack-lg py-4 font-body-md text-on-surface-variant">Cuadrilla Beta-1</td>
-                <td class="px-stack-lg py-4">
-                  <span
-                    class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">visibility</span>
-                </td>
-              </tr>
-            </tbody>
+            <tbody id="reportsTableBody" class="divide-y divide-outline-variant"></tbody>
           </table>
         </div>
         <div class="px-stack-lg py-stack-md bg-surface-container-low flex justify-between items-center">
@@ -547,6 +480,68 @@
         </div>
       </div>
     </footer>
+    <script>
+      const apiBase = 'http://localhost:3000';
+      const tableBody = document.getElementById('reportsTableBody');
+
+      async function loadReports() {
+        const response = await fetch(`${apiBase}/reports`);
+        const reports = response.ok ? await response.json() : [];
+
+        tableBody.innerHTML = reports.map((report) => {
+          const safeId = String(report.id || '').replace(/"/g, '&quot;');
+          return `
+            <tr class="hover:bg-surface-container-lowest transition-colors">
+              <td class="px-stack-lg py-4 font-data-mono text-data-mono">#${report.id}</td>
+              <td class="px-stack-lg py-4">
+                <p class="font-body-md font-semibold">${report.location || 'Sin ubicación'}</p>
+                <p class="text-[12px] text-on-surface-variant">${report.title || 'Sin título'}</p>
+              </td>
+              <td class="px-stack-lg py-4">
+                <span class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full text-[11px] font-bold">MEDIA</span>
+              </td>
+              <td class="px-stack-lg py-4">
+                <select data-id="${safeId}" class="status-select border border-outline-variant rounded px-2 py-1 text-sm">
+                  <option ${report.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
+                  <option ${report.status === 'En Revisión' ? 'selected' : ''}>En Revisión</option>
+                  <option ${report.status === 'Finalizado' ? 'selected' : ''}>Finalizado</option>
+                </select>
+              </td>
+              <td class="px-stack-lg py-4 font-body-md text-on-surface-variant">${report.userName || 'Ciudadano'}</td>
+              <td class="px-stack-lg py-4 text-[12px] text-on-surface-variant">${(report.createdAt || '').substring(0, 10)}</td>
+            </tr>
+          `;
+        }).join('');
+
+        document.querySelectorAll('.status-select').forEach((select) => {
+          select.addEventListener('change', async (event) => {
+            const reportId = event.target.getAttribute('data-id');
+            const status = event.target.value;
+            const token = prompt('Ingresa x-admin-token para actualizar estado:');
+            if (!token) {
+              await loadReports();
+              return;
+            }
+
+            const patchResponse = await fetch(`${apiBase}/reports/${reportId}/status`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-admin-token': token
+              },
+              body: JSON.stringify({ status })
+            });
+
+            if (!patchResponse.ok) {
+              alert('No se pudo actualizar el estado');
+            }
+            await loadReports();
+          });
+        });
+      }
+
+      loadReports();
+    </script>
     <!-- FAB Suppression Logic: Not rendered on reports page per instructions -->
   </body>
 

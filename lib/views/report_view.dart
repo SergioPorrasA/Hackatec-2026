@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import '../services/api_service.dart';
 
 class ReportView extends StatefulWidget {
   const ReportView({super.key});
@@ -18,6 +19,22 @@ class _ReportViewState extends State<ReportView> {
   /// Variables para mantener el estado de la selección de ubicación
   LatLng? _selectedLocation;
   String _selectedPlaceName = '';
+
+  Future<void> _submitReport({
+    required String location,
+    required double lat,
+    required double lng,
+  }) async {
+    await ApiService.createReport(
+      title: 'Bache reportado',
+      description: 'Reporte generado desde aplicación móvil',
+      locationText: location,
+      lat: lat,
+      lng: lng,
+      category: 'bache',
+      userName: 'Ciudadano',
+    );
+  }
 
   /// Obtiene el nombre del lugar usando reverse geocoding de MapTiler
   Future<String> _getPlaceName(LatLng location) async {
@@ -641,7 +658,21 @@ class _ReportViewState extends State<ReportView> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(sheetContext),
+                onPressed: () async {
+                  try {
+                    await _submitReport(location: location, lat: lat, lng: lng);
+                    if (!mounted) return;
+                    Navigator.pop(sheetContext);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Reporte enviado correctamente')),
+                    );
+                  } catch (_) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('No se pudo enviar el reporte al servidor')),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF670024),
                   padding: const EdgeInsets.symmetric(vertical: 16),

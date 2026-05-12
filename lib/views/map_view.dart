@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import '../services/api_service.dart';
 
 class MapView extends StatefulWidget {
   const MapView({super.key});
@@ -15,7 +16,7 @@ class _MapViewState extends State<MapView> {
   final MapController _mapController = MapController();
   double _zoom = 16.0;
 
-  final List<_IncidentZone> _zones = const [
+  List<_IncidentZone> _zones = const [
     _IncidentZone(
       label: 'Alta incidencia',
       color: Color(0xFFC62828),
@@ -38,6 +39,43 @@ class _MapViewState extends State<MapView> {
       area: 'Colonia Reforma',
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRiskZones();
+  }
+
+  Future<void> _loadRiskZones() async {
+    try {
+      final zones = await ApiService.getRiskZones();
+      if (!mounted) return;
+
+      setState(() {
+        _zones = zones
+            .map(
+              (zone) => _IncidentZone(
+                label: (zone['label'] as String?) ?? 'Zona',
+                color: _colorFromHex((zone['color'] as String?) ?? '#2E7D32'),
+                point: LatLng(
+                  ((zone['point'] as Map<String, dynamic>)['lat'] as num).toDouble(),
+                  ((zone['point'] as Map<String, dynamic>)['lng'] as num).toDouble(),
+                ),
+                reports: (zone['reports'] as num?)?.toInt() ?? 0,
+                area: 'Zona dinámica',
+              ),
+            )
+            .toList();
+      });
+    } catch (_) {
+      // Conserva zonas por defecto si backend no está disponible.
+    }
+  }
+
+  Color _colorFromHex(String hex) {
+    final value = hex.replaceAll('#', '');
+    return Color(int.parse('FF$value', radix: 16));
+  }
 
   void _zoomIn() {
     setState(() {

@@ -185,14 +185,26 @@
             <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Seguimiento cronológico de las
               intervenciones de bacheo y mantenimiento vial en el municipio de Oaxaca de Juárez.</p>
           </div>
-          <button
+          <button id="toggleFeedFormBtn"
             class="flex items-center gap-stack-sm bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-[0.98] transition-all shadow-md">
             <span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
             Nueva Publicación
           </button>
         </div>
+        <section id="feedAdminForm" class="hidden mb-gutter bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg">
+          <h3 class="font-h3 text-h3 text-on-surface mb-stack-md">Publicar actualización</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+            <input id="feedTitle" class="border border-outline-variant rounded-lg px-3 py-2" placeholder="Título" />
+            <input id="feedLocation" class="border border-outline-variant rounded-lg px-3 py-2" placeholder="Ubicación" />
+            <textarea id="feedDescription" class="md:col-span-2 border border-outline-variant rounded-lg px-3 py-2" rows="3" placeholder="Descripción"></textarea>
+            <input id="feedPhotos" class="md:col-span-2" type="file" multiple accept="image/*" />
+          </div>
+          <div class="mt-stack-md">
+            <button id="publishFeedBtn" class="bg-primary text-white px-4 py-2 rounded-lg">Subir publicación</button>
+          </div>
+        </section>
         <!-- Bento-style Grid Feed -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+        <div id="feedPostsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
           <!-- Card 1: Major Repair -->
           <article
             class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col shadow-sm group">
@@ -464,6 +476,76 @@
         </div>
       </div>
     </footer>
+    <script>
+      const apiBase = 'http://localhost:3000';
+      const feedGrid = document.getElementById('feedPostsGrid');
+      const toggleFormBtn = document.getElementById('toggleFeedFormBtn');
+      const form = document.getElementById('feedAdminForm');
+
+      toggleFormBtn.addEventListener('click', () => {
+        form.classList.toggle('hidden');
+      });
+
+      async function loadFeedPosts() {
+        const response = await fetch(`${apiBase}/feed`);
+        const posts = response.ok ? await response.json() : [];
+
+        feedGrid.innerHTML = posts.map((post) => {
+          const images = (post.imageUrls || []).map((url) => {
+            const src = url.startsWith('http') ? url : `${apiBase}${url}`;
+            return `<img src="${src}" alt="foto" class="w-full h-40 object-cover rounded-lg" />`;
+          }).join('');
+
+          return `
+            <article class="bg-surface-container-lowest border border-outline-variant rounded-xl p-stack-lg flex flex-col gap-stack-sm">
+              <span class="font-label-md text-label-md text-primary">${post.locationText || 'Sin ubicación'}</span>
+              <h3 class="font-h3 text-h3 text-on-surface">${post.title || 'Sin título'}</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant">${post.description || ''}</p>
+              <div class="grid grid-cols-1 gap-2 mt-2">${images || '<div class="text-sm text-on-surface-variant">Sin imágenes</div>'}</div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('publishFeedBtn').addEventListener('click', async () => {
+        const token = prompt('Ingresa x-admin-token para publicar:');
+        if (!token) return;
+
+        const title = document.getElementById('feedTitle').value;
+        const locationText = document.getElementById('feedLocation').value;
+        const description = document.getElementById('feedDescription').value;
+        const files = document.getElementById('feedPhotos').files;
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('locationText', locationText);
+        formData.append('description', description);
+
+        Array.from(files).forEach((file) => formData.append('photos', file));
+
+        const response = await fetch(`${apiBase}/feed`, {
+          method: 'POST',
+          headers: {
+            'x-admin-token': token
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          alert('No se pudo publicar en feed');
+          return;
+        }
+
+        document.getElementById('feedTitle').value = '';
+        document.getElementById('feedLocation').value = '';
+        document.getElementById('feedDescription').value = '';
+        document.getElementById('feedPhotos').value = '';
+
+        await loadFeedPosts();
+      });
+
+      loadFeedPosts();
+    </script>
   </body>
 
 </html>

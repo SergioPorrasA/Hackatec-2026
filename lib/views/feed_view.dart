@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 class FeedView extends StatefulWidget {
   const FeedView({super.key});
@@ -8,6 +9,31 @@ class FeedView extends StatefulWidget {
 }
 
 class _FeedViewState extends State<FeedView> {
+  List<Map<String, dynamic>> _posts = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFeed();
+  }
+
+  Future<void> _loadFeed() async {
+    try {
+      final data = await ApiService.getFeedPosts();
+      if (!mounted) return;
+      setState(() {
+        _posts = data;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,29 +99,26 @@ class _FeedViewState extends State<FeedView> {
               ),
             ),
             const SizedBox(height: 24),
-            _buildReportCard(
-              title: 'Bache reparado en San Felipe del Agua',
-              time: 'Hace 2 horas',
-              description: 'Reparación concluida sobre Av. Principal, con nivelación completa y sellado final.',
-              image: Icons.location_on,
-              location: 'San Felipe del Agua · Av. Principal',
-            ),
-            const SizedBox(height: 16),
-            _buildReportCard(
-              title: 'Intervención finalizada en Colonia Reforma',
-              time: 'Hace 1 día',
-              description: 'Se rehabilitó el tramo reportado y se documentó con fotografías del antes y después.',
-              image: Icons.location_on,
-              location: 'Colonia Reforma · Calle Heroica Escuela Naval Militar',
-            ),
-            const SizedBox(height: 16),
-            _buildReportCard(
-              title: 'Centro Histórico sin bache activo',
-              time: 'Hace 2 días',
-              description: 'La calle fue reparada y quedó marcada como atendida en el sistema de seguimiento.',
-              image: Icons.location_on,
-              location: 'Centro Histórico · Calle Macedonio Alcalá',
-            ),
+            if (_loading)
+              const Center(child: CircularProgressIndicator())
+            else if (_posts.isEmpty)
+              const Text('No hay publicaciones en el feed todavía.')
+            else
+              ..._posts.map((post) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildReportCard(
+                    title: (post['title'] as String?) ?? 'Sin título',
+                    time: (post['createdAt'] as String?)?.substring(0, 10) ?? 'Reciente',
+                    description: (post['description'] as String?) ?? '',
+                    image: Icons.location_on,
+                    location: (post['locationText'] as String?) ?? 'Sin ubicación',
+                    imageUrls: ((post['imageUrls'] as List<dynamic>?) ?? [])
+                        .map((e) => e.toString())
+                        .toList(),
+                  ),
+                );
+              }),
           ],
         ),
       ),
@@ -108,6 +131,7 @@ class _FeedViewState extends State<FeedView> {
     required String description,
     required IconData image,
     required String location,
+    List<String> imageUrls = const [],
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -147,51 +171,42 @@ class _FeedViewState extends State<FeedView> {
           const SizedBox(height: 8),
           Text(description, style: TextStyle(color: Colors.grey[700])),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 74,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F1EC),
+          if (imageUrls.isNotEmpty)
+            SizedBox(
+              height: 84,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: imageUrls.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final rawUrl = imageUrls[index];
+                  final fullUrl = rawUrl.startsWith('http')
+                      ? rawUrl
+                      : '${ApiService.baseUrl}$rawUrl';
+                  return ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.photo, color: Color(0xFF670024)),
-                  ),
-                ),
+                    child: Image.network(
+                      fullUrl,
+                      width: 120,
+                      height: 84,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 74,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F1EC),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.photo_library, color: Color(0xFF670024)),
-                  ),
-                ),
+            )
+          else
+            Container(
+              height: 74,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F1EC),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey[300]!),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  height: 74,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F1EC),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.image, color: Color(0xFF670024)),
-                  ),
-                ),
+              child: const Center(
+                child: Icon(Icons.photo, color: Color(0xFF670024)),
               ),
-            ],
-          ),
+            ),
           const SizedBox(height: 12),
           GestureDetector(
             onTap: () {},
