@@ -1,11 +1,32 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = String.fromEnvironment(
+  static const String configuredBaseUrl = String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'http://10.0.2.2:3000',
+    defaultValue: '',
   );
+
+  static const List<String> _fallbackBaseUrls = [
+    'http://10.0.2.2:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+  ];
+
+  static List<String> get _baseUrls {
+    if (configuredBaseUrl.isNotEmpty) {
+      return [configuredBaseUrl];
+    }
+
+    if (Platform.isIOS) {
+      return const ['http://127.0.0.1:3000', 'http://localhost:3000'];
+    }
+
+    return _fallbackBaseUrls;
+  }
+
+  static String get baseUrl => _baseUrls.first;
 
   static Uri _uri(String path, [Map<String, dynamic>? query]) {
     return Uri.parse('$baseUrl$path').replace(
@@ -13,9 +34,51 @@ class ApiService {
     );
   }
 
+  static Future<http.Response> _getWithFallback(
+    String path, {
+    Map<String, dynamic>? query,
+  }) async {
+    Object? lastError;
+
+    for (final baseUrl in _baseUrls) {
+      try {
+        final uri = Uri.parse('$baseUrl$path').replace(
+          queryParameters: query?.map((key, value) => MapEntry(key, value.toString())),
+        );
+        return await http.get(uri).timeout(const Duration(seconds: 8));
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw Exception('No se pudo conectar al backend: $lastError');
+  }
+
+  static Future<http.Response> _postWithFallback(
+    String path, {
+    required Map<String, String> headers,
+    required Object body,
+  }) async {
+    Object? lastError;
+
+    for (final baseUrl in _baseUrls) {
+      try {
+        final uri = Uri.parse('$baseUrl$path');
+        return await http
+            .post(uri, headers: headers, body: body)
+            .timeout(const Duration(seconds: 8));
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw Exception('No se pudo conectar al backend: $lastError');
+  }
+
   static Future<List<Map<String, dynamic>>> getReports({String? status}) async {
-    final response = await http.get(
-      _uri('/reports', status == null ? null : {'status': status}),
+    final response = await _getWithFallback(
+      '/reports',
+      query: status == null ? null : {'status': status},
     );
     if (response.statusCode != 200) {
       throw Exception('No se pudieron obtener reportes');
@@ -33,8 +96,8 @@ class ApiService {
     String category = 'bache',
     String userName = 'Ciudadano',
   }) async {
-    final response = await http.post(
-      _uri('/reports'),
+    final response = await _postWithFallback(
+      '/reports',
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'title': title,
@@ -55,7 +118,7 @@ class ApiService {
   }
 
   static Future<List<Map<String, dynamic>>> getRiskZones() async {
-    final response = await http.get(_uri('/risk-zones'));
+    final response = await _getWithFallback('/risk-zones');
     if (response.statusCode != 200) {
       throw Exception('No se pudieron obtener zonas de riesgo');
     }
@@ -64,7 +127,7 @@ class ApiService {
   }
 
   static Future<List<Map<String, dynamic>>> getFeedPosts() async {
-    final response = await http.get(_uri('/feed'));
+    final response = await _getWithFallback('/feed');
     if (response.statusCode != 200) {
       throw Exception('No se pudo obtener el feed');
     }

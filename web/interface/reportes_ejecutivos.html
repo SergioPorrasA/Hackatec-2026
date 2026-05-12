@@ -517,17 +517,10 @@
           select.addEventListener('change', async (event) => {
             const reportId = event.target.getAttribute('data-id');
             const status = event.target.value;
-            const token = prompt('Ingresa x-admin-token para actualizar estado:');
-            if (!token) {
-              await loadReports();
-              return;
-            }
-
             const patchResponse = await fetch(`${apiBase}/reports/${reportId}/status`, {
               method: 'PATCH',
               headers: {
                 'Content-Type': 'application/json',
-                'x-admin-token': token
               },
               body: JSON.stringify({ status })
             });

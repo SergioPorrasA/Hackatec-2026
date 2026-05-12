@@ -508,9 +508,6 @@
       }
 
       document.getElementById('publishFeedBtn').addEventListener('click', async () => {
-        const token = prompt('Ingresa x-admin-token para publicar:');
-        if (!token) return;
-
         const title = document.getElementById('feedTitle').value;
         const locationText = document.getElementById('feedLocation').value;
         const description = document.getElementById('feedDescription').value;
@@ -525,9 +522,6 @@
 
         const response = await fetch(`${apiBase}/feed`, {
           method: 'POST',
-          headers: {
-            'x-admin-token': token
-          },
           body: formData
         });
 

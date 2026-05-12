@@ -11,6 +11,7 @@ class FeedView extends StatefulWidget {
 class _FeedViewState extends State<FeedView> {
   List<Map<String, dynamic>> _posts = [];
   bool _loading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -25,11 +26,13 @@ class _FeedViewState extends State<FeedView> {
       setState(() {
         _posts = data;
         _loading = false;
+        _errorMessage = null;
       });
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() {
         _loading = false;
+        _errorMessage = 'No se pudo cargar el feed: $error';
       });
     }
   }
@@ -101,6 +104,14 @@ class _FeedViewState extends State<FeedView> {
             const SizedBox(height: 24),
             if (_loading)
               const Center(child: CircularProgressIndicator())
+            else if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+              )
             else if (_posts.isEmpty)
               const Text('No hay publicaciones en el feed todavía.')
             else
