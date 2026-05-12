@@ -106,8 +106,9 @@ function reportToClient(doc) {
 }
 
 function getRiskByCount(count) {
-  if (count >= 10) return { label: 'Alta incidencia', level: 'high', color: '#C62828' };
-  if (count >= 5) return { label: 'Incidencia media', level: 'medium', color: '#F9A825' };
+  // Nuevo criterio: >=5 -> alerta amarilla, >10 -> alerta roja
+  if (count > 10) return { label: 'Alerta roja', level: 'red', color: '#C62828' };
+  if (count >= 5) return { label: 'Alerta amarilla', level: 'yellow', color: '#F9A825' };
   return { label: 'Baja incidencia', level: 'low', color: '#2E7D32' };
 }
 
@@ -125,22 +126,33 @@ async function buildRiskZones() {
     const cellLng = Math.round(lng * 200) / 200;
     const key = `${cellLat}:${cellLng}`;
 
-    const current = buckets.get(key) || { lat: cellLat, lng: cellLng, count: 0 };
+    // Track sum of lat/lng and count so we can compute centroid of reports
+    const current = buckets.get(key) || { latSum: 0, lngSum: 0, count: 0 };
+    current.latSum += lat;
+    current.lngSum += lng;
     current.count += 1;
     buckets.set(key, current);
   }
 
   return Array.from(buckets.values())
     .map((bucket, index) => {
-      const risk = getRiskByCount(bucket.count);
-      return {
-        id: `zone-${index + 1}`,
-        point: { lat: bucket.lat, lng: bucket.lng },
-        reports: bucket.count,
-        label: risk.label,
-        riskLevel: risk.level,
-        color: risk.color,
-      };
+        const risk = getRiskByCount(bucket.count);
+        // radius: provide a compact scale in meters so clients render tighter
+        // zones. Use a smaller base and per-report multiplier so nearby baches
+        // don't produce overly large areas. Cap to a reasonable maximum.
+        const radius = Math.min(150, 30 + bucket.count * 12);
+        // compute centroid from summed lat/lng
+        const avgLat = bucket.latSum / bucket.count;
+        const avgLng = bucket.lngSum / bucket.count;
+        return {
+          id: `zone-${index + 1}`,
+          point: { lat: avgLat, lng: avgLng },
+          reports: bucket.count,
+          radius,
+          label: risk.label,
+          riskLevel: risk.level,
+          color: risk.color,
+        };
     })
     .sort((a, b) => b.reports - a.reports);
 }

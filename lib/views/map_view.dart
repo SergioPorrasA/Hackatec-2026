@@ -1,4 +1,5 @@
 
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -23,6 +24,7 @@ class _MapViewState extends State<MapView> {
       point: LatLng(17.0708, -96.7228),
       reports: 14,
       area: 'Av. Independencia & Morelos',
+      radius: 120,
     ),
     _IncidentZone(
       label: 'Incidencia media',
@@ -30,6 +32,7 @@ class _MapViewState extends State<MapView> {
       point: LatLng(17.0743, -96.7301),
       reports: 7,
       area: 'Centro Histórico',
+      radius: 90,
     ),
     _IncidentZone(
       label: 'Baja incidencia',
@@ -37,6 +40,7 @@ class _MapViewState extends State<MapView> {
       point: LatLng(17.0791, -96.7246),
       reports: 2,
       area: 'Colonia Reforma',
+      radius: 50,
     ),
   ];
 
@@ -63,6 +67,7 @@ class _MapViewState extends State<MapView> {
                 ),
                 reports: (zone['reports'] as num?)?.toInt() ?? 0,
                 area: 'Zona dinámica',
+                radius: (zone['radius'] as num?)?.toInt() ?? math.min(150, (((zone['reports'] as num?)?.toInt() ?? 0) * 12 + 30)),
               ),
             )
             .toList();
@@ -144,7 +149,7 @@ class _MapViewState extends State<MapView> {
                     .map(
                       (zone) => CircleMarker(
                         point: zone.point,
-                        radius: 120,
+                        radius: zone.radius.toDouble(),
                         color: zone.color.withAlpha(48),
                         borderColor: zone.color,
                         borderStrokeWidth: 2,
@@ -280,6 +285,7 @@ class _IncidentZone {
     required this.point,
     required this.reports,
     required this.area,
+    required this.radius,
   });
 
   final String label;
@@ -287,6 +293,7 @@ class _IncidentZone {
   final LatLng point;
   final int reports;
   final String area;
+  final int radius;
 }
 
 

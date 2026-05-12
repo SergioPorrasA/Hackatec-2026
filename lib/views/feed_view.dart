@@ -94,7 +94,7 @@ class _FeedViewState extends State<FeedView> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'Publicaciones verificadas: 1,248',
+                _loading ? 'Cargando publicaciones…' : 'Publicaciones verificadas: ${_posts.length}',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF670024),

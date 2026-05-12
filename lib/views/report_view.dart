@@ -255,10 +255,12 @@ class _ReportViewState extends State<ReportView> {
 
           // Cargar la ubicación actual cuando la sheet se abre
           Future.microtask(() async {
+            bool hasValidLocation = false;
             final location = await _getCurrentLocation();
             if (location != null && mounted) {
               localSetState(() {
                 currentLocation = location;
+                hasValidLocation = true;
               });
               final placeName = await _getPlaceName(location);
               if (mounted) {
@@ -270,6 +272,7 @@ class _ReportViewState extends State<ReportView> {
             } else {
               if (mounted) {
                 localSetState(() {
+                  currentPlaceName = '';
                   isLoading = false;
                 });
               }
@@ -311,7 +314,7 @@ class _ReportViewState extends State<ReportView> {
                             )
                           else
                             const Text(
-                              'Ubicación no disponible',
+                              'No se obtuvo una ubicación GPS válida. Activa ubicación o intenta nuevamente.',
                               style: TextStyle(fontSize: 12, color: Colors.red),
                             ),
                         ],
@@ -370,7 +373,7 @@ class _ReportViewState extends State<ReportView> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: isLoading
+                    onPressed: (isLoading || currentPlaceName.isEmpty)
                         ? null
                         : () {
                             Navigator.pop(sheetContext);
