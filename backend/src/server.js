@@ -5,10 +5,19 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
+const { Server } = require('socket.io');
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  },
+});
 const port = process.env.PORT || 3000;
 const allowedOrigin = process.env.CORS_ORIGIN || '*';
 const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/oaxaca_reporta';
@@ -346,6 +355,19 @@ app.patch('/reports/:id/status', authAdmin, async (req, res) => {
 
   await createStatusNotification(report, status);
 
+  // Emit real-time notification via Socket.io
+  if (status === 'En Revisión') {
+    io.emit('status_updated', {
+      reportId: report.reportId,
+      title: report.title,
+      location: report.locationText,
+      status: status,
+      coordinates: report.coordinates,
+      timestamp: new Date(),
+      message: `El reporte "${report.title}" en ${report.locationText} ahora está en revisión.`,
+    });
+  }
+
   return res.json(reportToClient(report));
 });
 
@@ -517,12 +539,27 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
+// Socket.io connection handling
+io.on('connection', (socket) => {
+  console.log(`Mobile app connected: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`Mobile app disconnected: ${socket.id}`);
+  });
+
+  // App can listen for status updates
+  socket.on('subscribe_to_updates', (data) => {
+    console.log(`Client subscribed to updates: ${data?.phone || 'unknown'}`);
+  });
+});
+
 async function start() {
   try {
     await mongoose.connect(mongoUri);
     console.log('MongoDB connected');
-    app.listen(port, () => {
-      console.log(`Oaxaca Reporta backend running on http://localhost:${port}`);
+    server.listen(port, '0.0.0.0', () => {
+      console.log(`Oaxaca Reporta backend running on http://0.0.0.0:${port}`);
+      console.log(`WebSocket available at ws://0.0.0.0:${port}`);
     });
   } catch (error) {
     console.error('Failed to start backend:', error.message);

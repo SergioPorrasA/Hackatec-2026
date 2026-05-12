@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'services/api_service.dart';
 import 'views/feed_view.dart';
 import 'views/login_view.dart';
 import 'views/map_view.dart';
@@ -57,10 +58,7 @@ class _AppGateState extends State<AppGate> {
       return LoginView(onLogin: _handleLogin);
     }
 
-    return MainApp(
-      user: _user!,
-      onLogout: _handleLogout,
-    );
+    return MainApp(user: _user!, onLogout: _handleLogout);
   }
 }
 
@@ -77,6 +75,72 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   int _selectedIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize WebSocket for real-time notifications
+    ApiService.initializeWebSocket(onStatusUpdated: _handleStatusUpdate);
+  }
+
+  @override
+  void dispose() {
+    // Disconnect WebSocket when app closes
+    ApiService.disconnectWebSocket();
+    super.dispose();
+  }
+
+  void _handleStatusUpdate(Map<String, dynamic> notification) {
+    if (!mounted) return;
+
+    final title = notification['title'] ?? 'Reporte actualizado';
+    final message =
+        notification['message'] ??
+        'Un reporte ha sido marcado como En Revisión';
+    final location = notification['location'] ?? '';
+
+    // Show notification as SnackBar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(message, style: const TextStyle(fontSize: 14)),
+            if (location.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  'Ubicación: $location',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        duration: const Duration(seconds: 6),
+        backgroundColor: Colors.blue.shade700,
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'Ver',
+          textColor: Colors.white,
+          onPressed: () {
+            // Switch to status view to see the update
+            setState(() {
+              _selectedIndex = 3;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -90,7 +154,9 @@ class _MainAppState extends State<MainApp> {
       onLogout: widget.onLogout,
     );
     final reportView = ReportView(user: widget.user);
-    final statusView = StatusView(userPhone: (widget.user['phone'] as String?) ?? '');
+    final statusView = StatusView(
+      userPhone: (widget.user['phone'] as String?) ?? '',
+    );
     final views = [
       const FeedView(),
       const MapView(),
@@ -110,26 +176,17 @@ class _MainAppState extends State<MainApp> {
             icon: Icon(Icons.dynamic_feed),
             label: 'Feed',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
           BottomNavigationBarItem(
             icon: Icon(Icons.add_circle_outline),
-            activeIcon: Icon(
-              Icons.add_circle,
-              size: 30,
-            ),
+            activeIcon: Icon(Icons.add_circle, size: 30),
             label: 'Report',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.assignment_turned_in),
             label: 'Status',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

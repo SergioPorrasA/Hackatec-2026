@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ApiService {
   static const String configuredBaseUrl = String.fromEnvironment(
@@ -28,6 +29,72 @@ class ApiService {
 
   static String get baseUrl => _baseUrls.first;
 
+  // WebSocket for real-time notifications
+  static IO.Socket? _socket;
+  static Function(Map<String, dynamic>)? _onStatusUpdated;
+
+  /// Initialize WebSocket connection for real-time notifications
+  static void initializeWebSocket({
+    required Function(Map<String, dynamic>) onStatusUpdated,
+  }) {
+    _onStatusUpdated = onStatusUpdated;
+    _connectWebSocket();
+  }
+
+  static void _connectWebSocket() {
+    final wsBaseUrl = baseUrl
+        .replaceFirst('http://', 'ws://')
+        .replaceFirst('https://', 'wss://');
+
+    try {
+      _socket = IO.io(
+        wsBaseUrl,
+        IO.OptionBuilder()
+            .setTransports(['websocket'])
+            .enableAutoConnect()
+            .enableReconnection()
+            .setReconnectionDelay(1000)
+            .setReconnectionDelayMax(5000)
+            .setReconnectionAttempts(99999)
+            .build(),
+      );
+
+      _socket!.onConnect((_) {
+        print('✓ WebSocket conectado: ${_socket!.id}');
+        // Notify app that we're connected and ready for updates
+        _socket!.emit('subscribe_to_updates', {'phone': 'app_user'});
+      });
+
+      _socket!.onDisconnect((_) {
+        print('✗ WebSocket desconectado');
+      });
+
+      // Listen for status updates from backend
+      _socket!.on('status_updated', (data) {
+        print('📢 Notificación recibida: $data');
+        if (_onStatusUpdated != null) {
+          _onStatusUpdated!(Map<String, dynamic>.from(data as Map));
+        }
+      });
+
+      _socket!.onError((error) {
+        print('❌ Error WebSocket: $error');
+      });
+    } catch (e) {
+      print('Error al conectar WebSocket: $e');
+    }
+  }
+
+  /// Disconnect WebSocket
+  static void disconnectWebSocket() {
+    _socket?.disconnect();
+    _socket?.dispose();
+    _socket = null;
+  }
+
+  /// Get WebSocket connection status
+  static bool get isWebSocketConnected => _socket?.connected ?? false;
+
   static Future<http.Response> _getWithFallback(
     String path, {
     Map<String, dynamic>? query,
@@ -37,7 +104,9 @@ class ApiService {
     for (final baseUrl in _baseUrls) {
       try {
         final uri = Uri.parse('$baseUrl$path').replace(
-          queryParameters: query?.map((key, value) => MapEntry(key, value.toString())),
+          queryParameters: query?.map(
+            (key, value) => MapEntry(key, value.toString()),
+          ),
         );
         return await http.get(uri).timeout(const Duration(seconds: 8));
       } catch (error) {
