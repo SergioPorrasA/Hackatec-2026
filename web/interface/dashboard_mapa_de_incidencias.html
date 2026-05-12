@@ -5,7 +5,10 @@
   <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dashboard de Incidencias - Oaxaca de Juárez</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
       rel="stylesheet" />
     <link
@@ -114,6 +117,15 @@
       body {
         font-family: 'Inter', sans-serif;
       }
+
+      #incidenciasMap {
+        position: absolute;
+        inset: 0;
+      }
+
+      .status-chip {
+        backdrop-filter: blur(8px);
+      }
     </style>
   </head>
 
@@ -181,46 +193,25 @@
       <div class="flex flex-col lg:flex-row h-[calc(100vh-64px)]">
         <!-- MAP CONTAINER -->
         <section class="flex-1 relative bg-surface-container overflow-hidden">
-          <!-- Map Background Placeholder -->
-          <div class="absolute inset-0 z-0">
-            <img class="w-full h-full object-cover grayscale opacity-40"
-              data-alt="A high-altitude satellite map view of the historic center of Oaxaca City, showing the colonial street grid and urban density. The image is styled with a subtle desaturation and high contrast to emphasize structural lines, with a soft overlay that mimics a professional GIS software interface. The color temperature is slightly cool to contrast with vibrant UI markers."
-              data-location="Oaxaca City"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxeDdxLoa9lIdzOdKM4dy0kzM9w1id3J12ahu2KDk9_mKXU9vKL-_eAdVNNECtULcMzBX_dL1-vWosun38jyYCzL5wj71d9jileDQ2br10p4Ex8RtnVZrvG-278-T70y3708HuU0fz1CI16cg5mSrXX0dvWibj9kGq2bNQzwF4Z55ujYirA9u1X6lOo2z7YmKHcFyag57RSL8eqcgu6NNrNHC6NNvc4BA7suddhEcQxdxxzZxUs3leu9hNc0AaxmHdj_87O5ipoQE" />
-          </div>
+          <div id="incidenciasMap" aria-label="Mapa en tiempo real de incidencias"></div>
           <!-- Floating Map Controls -->
           <div class="absolute top-stack-lg left-stack-lg z-10 flex flex-col gap-2">
             <div class="bg-surface p-2 rounded-lg shadow-sm border border-outline-variant flex flex-col gap-1">
-              <button
+              <button id="zoomInBtn"
                 class="material-symbols-outlined p-1 hover:bg-surface-container-high rounded text-on-surface-variant"
                 data-icon="add">add</button>
               <hr class="border-outline-variant" />
-              <button
+              <button id="zoomOutBtn"
                 class="material-symbols-outlined p-1 hover:bg-surface-container-high rounded text-on-surface-variant"
                 data-icon="remove">remove</button>
             </div>
-            <button
+            <button id="locateBtn"
               class="bg-surface p-2 rounded-lg shadow-sm border border-outline-variant material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high"
-              data-icon="layers">layers</button>
+              data-icon="my_location">my_location</button>
           </div>
-          <!-- Custom Map Markers (Simulated) -->
-          <!-- Critical -->
-          <div class="absolute top-[30%] left-[45%] z-20 group cursor-pointer">
-            <div class="w-4 h-4 bg-error rounded-full border-2 border-white shadow-lg animate-pulse"></div>
-            <div
-              class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 bg-surface p-3 rounded-xl border border-outline-variant shadow-xl">
-              <p class="font-label-md text-error text-[10px] mb-1">CRÍTICO #8821</p>
-              <p class="font-h3 text-[14px] text-on-surface leading-tight mb-2">Socavón en Av. Independencia</p>
-              <span class="bg-error/10 text-error px-2 py-0.5 rounded text-[10px] font-bold">ALTA PRIORIDAD</span>
-            </div>
-          </div>
-          <!-- Pending -->
-          <div class="absolute top-[50%] left-[60%] z-20 group cursor-pointer">
-            <div class="w-4 h-4 bg-tertiary-container rounded-full border-2 border-white shadow-lg"></div>
-          </div>
-          <!-- Repaired -->
-          <div class="absolute top-[40%] left-[30%] z-20 group cursor-pointer">
-            <div class="w-4 h-4 bg-emerald-600 rounded-full border-2 border-white shadow-lg"></div>
+          <div class="absolute top-stack-lg right-stack-lg z-10 status-chip bg-surface/90 p-3 rounded-xl border border-outline-variant shadow-md max-w-xs">
+            <p class="font-label-md text-[11px] text-on-surface-variant uppercase tracking-wide">Ubicación en tiempo real</p>
+            <p id="gpsStatus" class="font-body-md text-[12px] text-on-surface mt-1">Inicializando GPS...</p>
           </div>
           <!-- Legend Overlay -->
           <div
@@ -426,6 +417,126 @@
         class="absolute right-full mr-4 bg-primary-container text-white px-4 py-2 rounded-lg font-label-md text-[12px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none">Nuevo
         Reporte Ciudadano</span>
     </button>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+      const map = L.map('incidenciasMap', {
+        zoomControl: false,
+        minZoom: 3,
+        maxZoom: 20
+      }).setView([17.0732, -96.7266], 16);
+
+      const mapTilerKey = 'vho6orZjGT63tDnxKRLq';
+      L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${mapTilerKey}`, {
+        maxZoom: 20,
+        attribution: '&copy; OpenStreetMap contributors &copy; MapTiler'
+      }).addTo(map);
+
+      const incidents = [
+        {
+          id: '#8821',
+          title: 'Socavón en Av. Independencia',
+          status: 'critico',
+          lat: 17.0650,
+          lng: -96.7224,
+          detail: 'ALTA PRIORIDAD'
+        },
+        {
+          id: '#8834',
+          title: 'Bache reportado en Calzada Madero',
+          status: 'pendiente',
+          lat: 17.0754,
+          lng: -96.7177,
+          detail: 'EN VALIDACION'
+        },
+        {
+          id: '#8778',
+          title: 'Reparación completada en Col. Reforma',
+          status: 'reparado',
+          lat: 17.0832,
+          lng: -96.7302,
+          detail: 'CERRADO'
+        }
+      ];
+
+      const statusColor = {
+        critico: '#ba1a1a',
+        pendiente: '#cba72f',
+        reparado: '#059669'
+      };
+
+      incidents.forEach((incident) => {
+        const marker = L.circleMarker([incident.lat, incident.lng], {
+          radius: 8,
+          color: '#ffffff',
+          weight: 2,
+          fillColor: statusColor[incident.status],
+          fillOpacity: 0.95
+        }).addTo(map);
+
+        marker.bindPopup(`
+          <div style="font-family: Inter, sans-serif; min-width: 220px;">
+            <p style="margin: 0 0 6px; font-size: 11px; color: ${statusColor[incident.status]}; font-weight: 700;">${incident.id}</p>
+            <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #191c1d;">${incident.title}</p>
+            <span style="display:inline-block; padding: 3px 8px; border-radius: 8px; font-size: 10px; font-weight: 700; background: #f3f4f5; color: #191c1d;">${incident.detail}</span>
+          </div>
+        `);
+      });
+
+      const gpsStatus = document.getElementById('gpsStatus');
+      const zoomInBtn = document.getElementById('zoomInBtn');
+      const zoomOutBtn = document.getElementById('zoomOutBtn');
+      const locateBtn = document.getElementById('locateBtn');
+      let userMarker = null;
+      let accuracyCircle = null;
+
+      zoomInBtn.addEventListener('click', () => map.zoomIn());
+      zoomOutBtn.addEventListener('click', () => map.zoomOut());
+      locateBtn.addEventListener('click', () => {
+        if (userMarker) {
+          map.setView(userMarker.getLatLng(), Math.max(map.getZoom(), 16));
+          gpsStatus.textContent = 'Ubicación reciente centrada en el mapa.';
+        } else {
+          gpsStatus.textContent = 'Buscando señal GPS...';
+        }
+      });
+
+      if ('geolocation' in navigator) {
+        navigator.geolocation.watchPosition(
+          (position) => {
+            const { latitude, longitude, accuracy } = position.coords;
+            const latLng = [latitude, longitude];
+
+            if (!userMarker) {
+              userMarker = L.marker(latLng).addTo(map).bindPopup('Tu ubicación actual');
+              accuracyCircle = L.circle(latLng, {
+                radius: accuracy,
+                color: '#2563eb',
+                fillColor: '#60a5fa',
+                fillOpacity: 0.15,
+                weight: 1
+              }).addTo(map);
+              map.setView(latLng, 16);
+            } else {
+              userMarker.setLatLng(latLng);
+              accuracyCircle.setLatLng(latLng).setRadius(accuracy);
+            }
+
+            gpsStatus.textContent = `GPS activo: ${latitude.toFixed(5)}, ${longitude.toFixed(5)} (±${Math.round(accuracy)}m)`;
+          },
+          (error) => {
+            gpsStatus.textContent = `GPS no disponible: ${error.message}`;
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 5000,
+            timeout: 15000
+          }
+        );
+      } else {
+        gpsStatus.textContent = 'Este navegador no soporta geolocalización.';
+      }
+    </script>
   </body>
 
 </html>

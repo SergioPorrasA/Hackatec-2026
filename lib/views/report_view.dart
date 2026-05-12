@@ -317,7 +317,9 @@ class _ReportViewState extends State<ReportView> {
                   child: FlutterMap(
                     options: MapOptions(
                       initialCenter: currentLocation,
-                      initialZoom: 16,
+                      initialZoom: 18,
+                      maxZoom: 20,
+                      minZoom: 3,
                     ),
                     children: [
                       TileLayer(
@@ -394,7 +396,7 @@ class _ReportViewState extends State<ReportView> {
       builder: (sheetContext) => StatefulBuilder(
         builder: (sheetContext, localSetState) {
           final MapController localController = MapController();
-          double localZoom = 13.2;
+          double localZoom = 16.0;
 
           return Container(
             padding: const EdgeInsets.all(24),
@@ -442,6 +444,8 @@ class _ReportViewState extends State<ReportView> {
                     options: MapOptions(
                       initialCenter: const LatLng(17.0732, -96.7266),
                       initialZoom: localZoom,
+                      maxZoom: 20,
+                      minZoom: 3,
                       onTap: (tapPos, latLng) async {
                         // Actualizar ubicación seleccionada inmediatamente
                         _selectedLocation = latLng;

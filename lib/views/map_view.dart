@@ -13,7 +13,7 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   final LatLng _center = const LatLng(17.0732, -96.7266);
   final MapController _mapController = MapController();
-  double _zoom = 13.2;
+  double _zoom = 16.0;
 
   final List<_IncidentZone> _zones = const [
     _IncidentZone(
@@ -88,6 +88,8 @@ class _MapViewState extends State<MapView> {
             options: MapOptions(
               initialCenter: _center,
               initialZoom: _zoom,
+              maxZoom: 20,
+              minZoom: 3,
               interactionOptions: const InteractionOptions(
                 flags: InteractiveFlag.all,
                 scrollWheelVelocity: 0.01,
