@@ -16,84 +16,22 @@ class ApiService {
   ];
 
   static List<String> get _baseUrls {
+    final urls = <String>[];
+
     if (configuredBaseUrl.isNotEmpty) {
-      return [configuredBaseUrl];
+      urls.add(configuredBaseUrl);
     }
 
     if (Platform.isIOS) {
-      return const ['http://127.0.0.1:3000', 'http://localhost:3000'];
+      urls.addAll(const ['http://127.0.0.1:3000', 'http://localhost:3000']);
+    } else {
+      urls.addAll(_fallbackBaseUrls);
     }
 
-    return _fallbackBaseUrls;
+    return urls.toSet().toList();
   }
 
   static String get baseUrl => _baseUrls.first;
-
-  // WebSocket for real-time notifications
-  static IO.Socket? _socket;
-  static Function(Map<String, dynamic>)? _onStatusUpdated;
-
-  /// Initialize WebSocket connection for real-time notifications
-  static void initializeWebSocket({
-    required Function(Map<String, dynamic>) onStatusUpdated,
-  }) {
-    _onStatusUpdated = onStatusUpdated;
-    _connectWebSocket();
-  }
-
-  static void _connectWebSocket() {
-    final wsBaseUrl = baseUrl
-        .replaceFirst('http://', 'ws://')
-        .replaceFirst('https://', 'wss://');
-
-    try {
-      _socket = IO.io(
-        wsBaseUrl,
-        IO.OptionBuilder()
-            .setTransports(['websocket'])
-            .enableAutoConnect()
-            .enableReconnection()
-            .setReconnectionDelay(1000)
-            .setReconnectionDelayMax(5000)
-            .setReconnectionAttempts(99999)
-            .build(),
-      );
-
-      _socket!.onConnect((_) {
-        print('✓ WebSocket conectado: ${_socket!.id}');
-        // Notify app that we're connected and ready for updates
-        _socket!.emit('subscribe_to_updates', {'phone': 'app_user'});
-      });
-
-      _socket!.onDisconnect((_) {
-        print('✗ WebSocket desconectado');
-      });
-
-      // Listen for status updates from backend
-      _socket!.on('status_updated', (data) {
-        print('📢 Notificación recibida: $data');
-        if (_onStatusUpdated != null) {
-          _onStatusUpdated!(Map<String, dynamic>.from(data as Map));
-        }
-      });
-
-      _socket!.onError((error) {
-        print('❌ Error WebSocket: $error');
-      });
-    } catch (e) {
-      print('Error al conectar WebSocket: $e');
-    }
-  }
-
-  /// Disconnect WebSocket
-  static void disconnectWebSocket() {
-    _socket?.disconnect();
-    _socket?.dispose();
-    _socket = null;
-  }
-
-  /// Get WebSocket connection status
-  static bool get isWebSocketConnected => _socket?.connected ?? false;
 
   static Future<http.Response> _getWithFallback(
     String path, {
@@ -114,7 +52,9 @@ class ApiService {
       }
     }
 
-    throw Exception('No se pudo conectar al backend: $lastError');
+    throw Exception(
+      'No se pudo conectar al backend: $lastError. ${_connectionHint()}',
+    );
   }
 
   static Future<http.Response> _postWithFallback(
@@ -135,7 +75,9 @@ class ApiService {
       }
     }
 
-    throw Exception('No se pudo conectar al backend: $lastError');
+    throw Exception(
+      'No se pudo conectar al backend: $lastError. ${_connectionHint()}',
+    );
   }
 
   static Future<List<Map<String, dynamic>>> getReports({String? status}) async {
@@ -216,7 +158,19 @@ class ApiService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('No se pudo iniciar sesión');
+      String message = 'No se pudo iniciar sesión';
+      try {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic> && decoded['message'] is String) {
+          message = decoded['message'] as String;
+        }
+      } catch (_) {
+        if (response.body.trim().isNotEmpty) {
+          message = response.body.trim();
+        }
+      }
+
+      throw Exception('$message (HTTP ${response.statusCode})');
     }
 
     return jsonDecode(response.body) as Map<String, dynamic>;
