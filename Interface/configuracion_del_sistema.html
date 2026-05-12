@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Configuración del Sistema - Oaxaca de Juárez</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet" />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+              "tertiary-fixed-dim": "#e9c349",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed-variant": "#89173d",
+              "on-background": "#191c1d",
+              "on-secondary-fixed": "#1b1c1c",
+              "error": "#ba1a1a",
+              "on-primary-fixed": "#3f0016",
+              "surface": "#f8f9fa",
+              "surface-container-high": "#e7e8e9",
+              "on-primary-container": "#ffb3c1",
+              "surface-container": "#edeeef",
+              "surface-container-low": "#f3f4f5",
+              "tertiary-container": "#cba72f",
+              "outline-variant": "#ddbfc3",
+              "primary-fixed-dim": "#ffb2bf",
+              "on-tertiary": "#ffffff",
+              "primary-fixed": "#ffd9de",
+              "on-tertiary-container": "#4e3d00",
+              "on-secondary-fixed-variant": "#474747",
+              "on-tertiary-fixed": "#241a00",
+              "outline": "#8a7174",
+              "on-primary": "#ffffff",
+              "on-secondary-container": "#646464",
+              "on-tertiary-fixed-variant": "#574500",
+              "primary-container": "#9a2649",
+              "on-surface": "#191c1d",
+              "on-error": "#ffffff",
+              "surface-bright": "#f8f9fa",
+              "error-container": "#ffdad6",
+              "tertiary-fixed": "#ffe088",
+              "secondary-fixed": "#e4e2e2",
+              "secondary-fixed-dim": "#c8c6c6",
+              "surface-variant": "#e1e3e4",
+              "surface-tint": "#a93154",
+              "inverse-on-surface": "#f0f1f2",
+              "on-error-container": "#93000a",
+              "secondary-container": "#e4e2e2",
+              "surface-container-highest": "#e1e3e4",
+              "tertiary": "#735c00",
+              "inverse-primary": "#ffb2bf",
+              "primary": "#7a0933",
+              "on-surface-variant": "#574145",
+              "background": "#f8f9fa",
+              "surface-container-lowest": "#ffffff",
+              "inverse-surface": "#2e3132",
+              "secondary": "#5e5e5e",
+              "surface-dim": "#d9dadb"
+            },
+            "borderRadius": {
+              "DEFAULT": "0.125rem",
+              "lg": "0.25rem",
+              "xl": "0.5rem",
+              "full": "0.75rem"
+            },
+            "spacing": {
+              "gutter": "24px",
+              "stack-md": "16px",
+              "container-max": "1440px",
+              "stack-sm": "8px",
+              "margin-desktop": "32px",
+              "stack-lg": "24px",
+              "margin-mobile": "16px",
+              "sidebar-width": "280px"
+            },
+            "fontFamily": {
+              "label-md": ["Inter"],
+              "h3": ["Inter"],
+              "data-mono": ["Inter"],
+              "body-lg": ["Inter"],
+              "h2": ["Inter"],
+              "h1": ["Inter"],
+              "body-md": ["Inter"]
+            },
+            "fontSize": {
+              "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+              "h3": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+              "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+              "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+              "h2": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+              "h1": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+              "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f9fa;
+        color: #191c1d;
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+
+      .sidebar-active {
+        border-left: 4px solid #ffffff;
+        background-color: #7a0933;
+      }
+
+      .card-urgent {
+        border-top: 4px solid #ba1a1a;
+      }
+
+      .card-standard {
+        border-top: 4px solid #9a2649;
+      }
+    </style>
+  </head>
+
+  <body class="flex min-h-screen">
+    <!-- SideNavBar Component -->
+    <aside
+      class="fixed left-0 top-0 h-full w-sidebar-width bg-primary text-on-primary border-r border-outline-variant flex flex-col h-full pt-stack-lg pb-0 z-50">
+      <div class="px-margin-mobile mb-stack-lg">
+        <h1 class="font-h3 text-h3 font-bold text-white">Oaxaca de Juárez</h1>
+        <p class="font-body-md text-body-md text-white/70">Sistema de Mantenimiento Vial</p>
+      </div>
+      <nav class="flex-grow">
+        <ul class="space-y-1">
+          <li>
+            <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+              href="dashboard_mapa_de_incidencias.html">
+              <span class="material-symbols-outlined" data-icon="map">map</span>
+              <span class="font-label-md text-label-md">Panel de Control</span>
+            </a>
+          </li>
+          <li>
+            <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+              href="reportes_ejecutivos.html">
+              <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+              <span class="font-label-md text-label-md">Reportes</span>
+            </a>
+          </li>
+          <li>
+            <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+              href="feed_de_actualizaciones.html">
+              <span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+              <span class="font-label-md text-label-md">Actualizaciones</span>
+            </a>
+          </li>
+          <li>
+            <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md bg-primary text-on-primary border-l-4 border-on-primary-fixed scale-[0.99] transition-transform"
+              href="configuracion_del_sistema.html">
+              <span class="material-symbols-outlined" data-icon="settings">settings</span>
+              <span class="font-label-md text-label-md">Configuracion</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <img alt="Gobierno de Oaxaca" class="block w-full max-w-[180px]" src="oaxacagob.png" />
+      </div>
+    </aside>
+    <!-- Main Content Area -->
+    <main class="flex-grow ml-sidebar-width">
+      <!-- TopAppBar Component -->
+      <header
+        class="fixed top-0 right-0 z-40 w-[calc(100%-280px)] h-16 bg-[#6b1834] text-white flex justify-between items-center px-margin-desktop border-b border-white/10">
+        <div class="flex items-center gap-stack-md">
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+            <input
+              class="pl-10 pr-4 py-2 bg-white/90 border border-white/30 rounded-lg font-body-md text-body-md w-64 focus:ring-2 focus:ring-white"
+              placeholder="Buscar en configuración..." type="text" />
+          </div>
+        </div>
+        <div class="flex items-center gap-stack-lg">
+          <div class="flex items-center gap-4">
+            <button class="p-2 text-white/90 hover:bg-white/10 transition-colors rounded-full">
+              <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+            <button class="p-2 text-white/90 hover:bg-white/10 transition-colors rounded-full">
+              <span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+            </button>
+          </div>
+          <div class="h-8 w-px bg-white/30"></div>
+          <div class="flex items-center gap-stack-sm">
+            <img alt="Perfil de usuario" class="w-8 h-8 rounded-full"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXo-QUVmVwfsyOo6qqUG0wDDcOi_WB4x8rcg19xZdnwlckO3mCG3kcxZdEnehEutRMoM1lFoZbXTbOVWU-k1_m9caLRiCrZA1_Ck4e1itssJp7QZEvK4CaUv-37Cmupbi_0e1yqbGjRnYCrMuZwIHSBaAqBemmHgQRVXpatwqoDrIgHLcd0EwCbSwqrLv7vQmudioBna50UmmOfbekxWsjfuYX8PzZ8jFwt0O8PLqy4oMSoAvnSLNUUEXXhULRbkblPEeZghxQUVo" />
+            <span class="font-label-md text-label-md text-white">Administrador Principal</span>
+          </div>
+        </div>
+      </header>
+      <!-- Scrollable Content Canvas -->
+      <div class="mt-16 p-margin-desktop max-w-container-max mx-auto">
+        <!-- Page Header -->
+        <div class="mb-stack-lg">
+          <h2 class="font-h1 text-h1 text-primary">Configuración del Sistema</h2>
+          <p class="font-body-lg text-body-lg text-on-surface-variant">Gestione las operaciones municipales, seguridad y
+            parámetros de infraestructura.</p>
+        </div>
+        <!-- Bento Grid Layout for Settings -->
+        <div class="grid grid-cols-12 gap-gutter">
+          <!-- Section: Personalización del Perfil Municipal (Large Bento Item) -->
+          <section
+            class="col-span-12 lg:col-span-8 bg-surface-container-lowest p-stack-lg rounded-xl border border-outline-variant card-standard shadow-sm">
+            <div class="flex items-center gap-stack-md mb-stack-lg">
+              <span class="material-symbols-outlined text-primary" data-icon="account_balance">account_balance</span>
+              <h3 class="font-h2 text-h2 text-on-surface">Perfil Municipal</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg">
+              <div class="space-y-stack-md">
+                <div>
+                  <label class="block font-label-md text-label-md text-on-surface-variant mb-1">Nombre Oficial</label>
+                  <input
+                    class="w-full border border-outline rounded p-3 font-body-md focus:border-primary focus:ring-1 focus:ring-primary"
+                    type="text" value="Municipio de Oaxaca de Juárez" />
+                </div>
+                <div>
+                  <label class="block font-label-md text-label-md text-on-surface-variant mb-1">Lema
+                    Institucional</label>
+                  <input
+                    class="w-full border border-outline rounded p-3 font-body-md focus:border-primary focus:ring-1 focus:ring-primary"
+                    type="text" value="El respeto al derecho ajeno es la paz" />
+                </div>
+                <div>
+                  <label class="block font-label-md text-label-md text-on-surface-variant mb-1">Zona Horaria</label>
+                  <select class="w-full border border-outline rounded p-3 font-body-md focus:border-primary">
+                    <option>Central Standard Time (CST) - Mexico</option>
+                    <option>Pacific Standard Time (PST)</option>
+                  </select>
+                </div>
+              </div>
+              <div
+                class="flex flex-col items-center justify-center border-2 border-dashed border-outline-variant rounded-xl p-stack-lg bg-surface-container-low">
+                <div
+                  class="w-24 h-24 bg-primary-container rounded-full flex items-center justify-center mb-stack-md text-on-primary-container shadow-inner">
+                  <span class="material-symbols-outlined text-4xl" data-icon="upload_file">upload_file</span>
+                </div>
+                <p class="font-label-md text-label-md text-on-surface text-center">Escudo Municipal Oficial</p>
+                <p class="text-[10px] text-on-surface-variant text-center mt-1">SVG o PNG (Max 5MB)</p>
+                <button
+                  class="mt-stack-md px-stack-md py-2 border border-primary text-primary font-label-md rounded hover:bg-primary/5 transition-colors">Actualizar
+                  Logo</button>
+              </div>
+            </div>
+          </section>
+          <!-- Section: Configuración de Alertas (Medium Bento Item) -->
+          <section
+            class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-stack-lg rounded-xl border border-outline-variant card-urgent shadow-sm">
+            <div class="flex items-center gap-stack-md mb-stack-lg">
+              <span class="material-symbols-outlined text-error" data-icon="emergency_home">emergency_home</span>
+              <h3 class="font-h3 text-h3 text-on-surface">Umbrales de Alerta</h3>
+            </div>
+            <div class="space-y-stack-lg">
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="font-label-md text-label-md text-on-surface-variant">Criticidad de Bache (cm)</label>
+                  <span class="text-error font-data-mono text-data-mono">8cm +</span>
+                </div>
+                <input
+                  class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-error"
+                  max="20" min="1" type="range" value="8" />
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="font-label-md text-label-md text-on-surface-variant">Tiempo de Respuesta Máx</label>
+                  <span class="text-on-surface font-data-mono text-data-mono">48 Horas</span>
+                </div>
+                <input
+                  class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary"
+                  max="168" min="12" type="range" value="48" />
+              </div>
+              <div class="p-3 bg-error-container/20 rounded-lg border border-error/20">
+                <div class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-error text-sm" data-icon="info">info</span>
+                  <p class="text-[11px] text-on-error-container leading-tight">Las alertas críticas envían
+                    notificaciones automáticas a los supervisores de cuadrilla.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Section: Gestión de Usuarios (Full Width Bento Item) -->
+          <section
+            class="col-span-12 bg-surface-container-lowest p-stack-lg rounded-xl border border-outline-variant shadow-sm">
+            <div class="flex justify-between items-center mb-stack-lg">
+              <div class="flex items-center gap-stack-md">
+                <span class="material-symbols-outlined text-primary" data-icon="group">group</span>
+                <h3 class="font-h2 text-h2 text-on-surface">Gestión de Usuarios</h3>
+              </div>
+              <button
+                class="bg-primary text-on-primary px-stack-lg py-2 rounded-lg font-label-md flex items-center gap-2 hover:opacity-90 transition-opacity">
+                <span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                Nuevo Usuario
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-outline-variant bg-surface-container-low">
+                    <th class="p-4 font-label-md text-on-surface-variant uppercase tracking-wider">Usuario</th>
+                    <th class="p-4 font-label-md text-on-surface-variant uppercase tracking-wider">Rol</th>
+                    <th class="p-4 font-label-md text-on-surface-variant uppercase tracking-wider">Departamento</th>
+                    <th class="p-4 font-label-md text-on-surface-variant uppercase tracking-wider">Estado</th>
+                    <th class="p-4 font-label-md text-on-surface-variant uppercase tracking-wider text-right">Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant">
+                  <tr class="hover:bg-surface-container transition-colors">
+                    <td class="p-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-8 h-8 bg-surface-container-highest rounded-full flex items-center justify-center text-primary font-bold">
+                          RL</div>
+                        <div>
+                          <p class="font-body-md font-semibold">Roberto López</p>
+                          <p class="text-xs text-on-surface-variant">r.lopez@oaxaca.gob.mx</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="p-4">
+                      <span
+                        class="px-2 py-1 bg-primary-fixed text-on-primary-fixed-variant rounded-full text-[10px] font-bold">ADMINISTRADOR</span>
+                    </td>
+                    <td class="p-4 font-body-md">Obras Públicas</td>
+                    <td class="p-4">
+                      <span class="flex items-center gap-1 text-green-700 text-xs font-bold">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span> Activo
+                      </span>
+                    </td>
+                    <td class="p-4 text-right">
+                      <button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined"
+                          data-icon="edit">edit</span></button>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-surface-container transition-colors">
+                    <td class="p-4">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-8 h-8 bg-surface-container-highest rounded-full flex items-center justify-center text-primary font-bold">
+                          C1</div>
+                        <div>
+                          <p class="font-body-md font-semibold">Cuadrilla Norte - Alpha</p>
+                          <p class="text-xs text-on-surface-variant">cuadrilla.alpha@oaxaca.gob.mx</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="p-4">
+                      <span
+                        class="px-2 py-1 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-bold uppercase">Cuadrilla</span>
+                    </td>
+                    <td class="p-4 font-body-md">Mantenimiento Vial</td>
+                    <td class="p-4">
+                      <span class="flex items-center gap-1 text-green-700 text-xs font-bold">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span> Activo
+                      </span>
+                    </td>
+                    <td class="p-4 text-right">
+                      <button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined"
+                          data-icon="edit">edit</span></button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <!-- Section: Integración con Maps/GPS (Side Bento Item) -->
+          <section
+            class="col-span-12 md:col-span-6 bg-surface-container-lowest p-stack-lg rounded-xl border border-outline-variant shadow-sm overflow-hidden flex flex-col">
+            <div class="flex items-center gap-stack-md mb-stack-lg">
+              <span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+              <h3 class="font-h3 text-h3 text-on-surface">Geolocalización y Mapas</h3>
+            </div>
+            <div class="flex-grow space-y-stack-md">
+              <div class="relative rounded-lg overflow-hidden h-40 mb-stack-md border border-outline-variant">
+                <img alt="Map interface placeholder" class="w-full h-full object-cover grayscale opacity-50"
+                  data-alt="A stylized, top-down digital map view of a historic Latin American city layout with grid-like streets and colonial plazas. The map uses a sophisticated dark-mode aesthetic with burgundy and gold path highlights. Digital interface overlays like GPS coordinate trackers and pin icons are visible, representing a high-tech infrastructure management system."
+                  data-location="Oaxaca de Juarez"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv-navuDYV-9wedZKSm1UBbwgwowE6jV1vmL63SE4t_rn5rgipYBUZQT8HYCsssBx5RcaL-CLXsDCJbpUTP9QPIvDAHrSfMoXKSpzpBkJxryx1ZL8io_O2p8fP0Yxnb5x5FRVxeYW_hWkJjKoTReuwpbAIkmi0wuAoV9zsV3hzlCHjJp8ZgyRB3Bv19WTynKZRBB0zKtwnd6qd2TxEEuAf-I-rzgHl2xQ3t6LmuXvFrbkubommZzirtG2GSOYUPH9aqPDkBNx0jOs" />
+                <div class="absolute inset-0 flex items-center justify-center bg-black/10">
+                  <span class="bg-surface px-3 py-1 rounded-full font-label-md text-primary shadow-sm">API Conectada:
+                    Google Maps Premium</span>
+                </div>
+              </div>
+              <div class="space-y-3">
+                <div
+                  class="flex items-center justify-between p-3 bg-surface-container rounded-lg border border-outline-variant">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-on-surface-variant"
+                      data-icon="satellite_alt">satellite_alt</span>
+                    <span class="font-body-md font-medium">Capa Satelital</span>
+                  </div>
+                  <div class="w-10 h-5 bg-primary rounded-full relative">
+                    <div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center justify-between p-3 bg-surface-container rounded-lg border border-outline-variant">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-on-surface-variant" data-icon="traffic">traffic</span>
+                    <span class="font-body-md font-medium">Tráfico en Tiempo Real</span>
+                  </div>
+                  <div class="w-10 h-5 bg-surface-container-highest rounded-full relative">
+                    <div class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- Section: System Health & Backup (Asymmetric Item) -->
+          <section
+            class="col-span-12 md:col-span-6 bg-surface-container-lowest p-stack-lg rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-stack-md mb-stack-lg">
+                <span class="material-symbols-outlined text-primary" data-icon="dns">dns</span>
+                <h3 class="font-h3 text-h3 text-on-surface">Infraestructura y Datos</h3>
+              </div>
+              <div class="space-y-stack-md mb-stack-lg">
+                <div class="flex justify-between items-center">
+                  <span class="font-body-md text-on-surface-variant">Uso de Almacenamiento (Cloud)</span>
+                  <span class="font-data-mono text-data-mono">42.8 GB / 100 GB</span>
+                </div>
+                <div class="w-full h-3 bg-surface-container-high rounded-full overflow-hidden">
+                  <div class="w-[42%] h-full bg-primary"></div>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-stack-md">
+              <button
+                class="flex flex-col items-center justify-center p-stack-md border border-outline rounded-lg hover:bg-surface-container transition-all">
+                <span class="material-symbols-outlined text-primary mb-2" data-icon="backup">backup</span>
+                <span class="font-label-md text-label-md">Backup Manual</span>
+              </button>
+              <button
+                class="flex flex-col items-center justify-center p-stack-md border border-outline rounded-lg hover:bg-surface-container transition-all">
+                <span class="material-symbols-outlined text-primary mb-2" data-icon="history">history</span>
+                <span class="font-label-md text-label-md">Logs del Sistema</span>
+              </button>
+            </div>
+          </section>
+        </div>
+        <!-- Action Footer -->
+        <div class="mt-gutter flex justify-end gap-stack-md pt-stack-lg border-t border-outline-variant">
+          <button
+            class="px-stack-lg py-3 border border-outline-variant text-on-surface-variant font-label-md rounded-lg hover:bg-surface-container-high transition-colors">Descartar
+            Cambios</button>
+          <button
+            class="px-stack-lg py-3 bg-primary text-on-primary font-label-md rounded-lg shadow-md hover:bg-opacity-90 transition-all">Guardar
+            Configuración General</button>
+        </div>
+      </div>
+    </main>
+    <footer class="ml-[280px] bg-[#6b1834] text-white">
+      <div class="max-w-container-max mx-auto px-margin-desktop py-gutter grid grid-cols-1 md:grid-cols-4 gap-gutter">
+        <div>
+          <img alt="Gobierno de Mexico" class="w-[180px] mb-4" src="mexico.png" />
+        </div>
+        <div>
+          <h3 class="font-h3 text-h3 mb-3">Enlaces</h3>
+          <ul class="space-y-2 text-body-md">
+            <li><a class="hover:underline" href="#">Participa</a></li>
+            <li><a class="hover:underline" href="#">Marco juridico</a></li>
+            <li><a class="hover:underline" href="#">Plataforma Nacional de Transparencia</a></li>
+            <li><a class="hover:underline" href="#">Transparencia para el pueblo</a></li>
+            <li><a class="hover:underline" href="#">Alerta</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-h3 text-h3 mb-3">¿Que es gob.mx?</h3>
+          <p class="text-body-md mb-4">Es el portal unico de tramites, informacion y participacion ciudadana. <a
+              class="underline" href="#">Leer mas</a></p>
+          <ul class="space-y-2 text-body-md">
+            <li><a class="hover:underline" href="#">Portal de datos abiertos</a></li>
+            <li><a class="hover:underline" href="#">Declaracion de Accesibilidad</a></li>
+            <li><a class="hover:underline" href="#">Terminos y Condiciones</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-h3 text-h3 mb-3">Denuncia contra servidores publicos</h3>
+          <h4 class="font-h3 text-h3 mt-6 mb-3">Siguenos en</h4>
+          <div class="flex items-center gap-3 text-body-md mb-6">
+            <a class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="Facebook" href="#">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M13.5 8.5H15V6h-2.5C10.57 6 9 7.57 9 9.5V12H7v2.5h2V20h2.5v-5.5h2l.5-2.5h-2.5V9.5c0-.55.45-1 1-1z" />
+              </svg>
+            </a>
+            <a class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="X" href="#">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M4 4h3.3l4.6 5.5L17.2 4H20l-6.6 7.6L20 20h-3.3l-5-6.1L6.6 20H4l7-8.2L4 4z" />
+              </svg>
+            </a>
+            <a class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="Instagram" href="#">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <rect x="5" y="5" width="14" height="14" rx="4" />
+                <circle cx="12" cy="12" r="3.5" />
+                <circle cx="16.5" cy="7.5" r="1" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            <a class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="YouTube" href="#">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M21 7.8a3 3 0 0 0-2.1-2.1C17 5.2 12 5.2 12 5.2s-5 0-6.9.5A3 3 0 0 0 3 7.8C2.5 9.7 2.5 12 2.5 12s0 2.3.5 4.2a3 3 0 0 0 2.1 2.1c1.9.5 6.9.5 6.9.5s5 0 6.9-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-4.2.5-4.2s0-2.3-.5-4.2z" />
+                <path d="M10 9.5v5l4.5-2.5L10 9.5z" fill="#6b1834" />
+              </svg>
+            </a>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">*</div>
+            <div>
+              <p class="font-h3 text-h3">079</p>
+              <p class="text-body-md">Comunicat e, estamos para ayudarte</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+
+</html>
