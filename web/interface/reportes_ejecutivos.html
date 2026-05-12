@@ -176,7 +176,7 @@
         </div>
       </div>
       <div class="flex items-center gap-stack-lg">
-        <button
+        <button id="generatePdfBtn"
           class="flex items-center gap-stack-sm px-4 py-2 bg-white/10 text-white rounded-lg font-label-md hover:bg-white/20 transition-opacity">
           <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
           Generar Reporte PDF
@@ -272,67 +272,27 @@
           </div>
         </div>
       </div>
-      <!-- Middle Charts Section -->
+      <!-- Middle Section -->
       <div class="grid grid-cols-12 gap-stack-lg mb-stack-lg">
-        <!-- Detailed Analytics Chart -->
+        <!-- Municipality Summary Table -->
         <div class="col-span-12 lg:col-span-8 bg-white p-stack-lg rounded-xl border border-outline-variant">
           <div class="flex justify-between items-center mb-stack-lg">
-            <h3 class="font-h3 text-h3 text-on-surface">Volumen de Reportes Semanales</h3>
-            <div class="flex items-center gap-stack-md">
-              <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-full bg-primary"></span>
-                <span class="text-label-md font-label-md text-on-surface-variant">Reportados</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-full bg-tertiary-container"></span>
-                <span class="text-label-md font-label-md text-on-surface-variant">Arreglados</span>
-              </div>
-            </div>
+            <h3 class="font-h3 text-h3 text-on-surface">Resumen por Municipio</h3>
+            <p class="font-body-md text-on-surface-variant">Número de baches reportados</p>
           </div>
-          <div class="h-[300px] flex items-end justify-between gap-4 px-4">
-            <!-- Dummy Bar Chart -->
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[70%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[55%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Lun</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[85%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[75%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Mar</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[60%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[60%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Mie</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[95%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[80%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Jue</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[80%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[85%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Vie</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[40%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[35%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Sab</span>
-            </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-surface-container-low border-b border-outline-variant">
+                  <th class="px-stack-lg py-4 font-label-md text-label-md text-on-surface-variant">MUNICIPIO</th>
+                  <th class="px-stack-lg py-4 font-label-md text-label-md text-on-surface-variant">NÚMERO DE BACHES</th>
+                </tr>
+              </thead>
+              <tbody id="municipalitySummaryBody" class="divide-y divide-outline-variant"></tbody>
+            </table>
+          </div>
+          <div class="mt-stack-sm">
+            <p class="text-[12px] text-on-surface-variant">Conteo basado en reportes registrados en el sistema.</p>
           </div>
         </div>
         <!-- Map Summary / Zone Chart -->
@@ -494,11 +454,165 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
     <script>
       const apiBase = 'http://localhost:3000';
       const tableBody = document.getElementById('reportsTableBody');
       const mapTilerKey = 'vho6orZjGT63tDnxKRLq';
       const reportsMapStatus = document.getElementById('reportsMapStatus');
+      const generatePdfBtn = document.getElementById('generatePdfBtn');
+      const municipalitySummaryBody = document.getElementById('municipalitySummaryBody');
+      let currentReports = [];
+
+      function parseStreetAndMunicipality(locationText) {
+        const rawLocation = String(locationText || '').trim();
+        if (!rawLocation) {
+          return {
+            street: 'Sin calle',
+            municipality: 'Oaxaca de Juarez',
+          };
+        }
+
+        const chunks = rawLocation
+          .split(',')
+          .map((chunk) => chunk.trim())
+          .filter(Boolean);
+
+        if (chunks.length === 1) {
+          return {
+            street: chunks[0],
+            municipality: 'Oaxaca de Juarez',
+          };
+        }
+
+        return {
+          street: chunks[0],
+          municipality: chunks[chunks.length - 1],
+        };
+      }
+
+      function getPriorityLabel(report) {
+        const raw = String(report.priority || '').trim();
+        if (!raw) return 'Media';
+        return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+      }
+
+      function renderMunicipalitySummary(reports) {
+        const totalsByMunicipality = new Map();
+
+        reports.forEach((report) => {
+          const { municipality } = parseStreetAndMunicipality(report.location);
+          const key = municipality || 'Oaxaca de Juarez';
+          totalsByMunicipality.set(key, (totalsByMunicipality.get(key) || 0) + 1);
+        });
+
+        const rows = Array.from(totalsByMunicipality.entries())
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+          .map(([municipality, count]) => `
+            <tr class="hover:bg-surface-container-lowest transition-colors">
+              <td class="px-stack-lg py-4 font-body-md text-on-surface">${municipality}</td>
+              <td class="px-stack-lg py-4 font-data-mono text-data-mono">${count}</td>
+            </tr>
+          `)
+          .join('');
+
+        municipalitySummaryBody.innerHTML = rows || `
+          <tr>
+            <td colspan="2" class="px-stack-lg py-4 text-on-surface-variant">Sin reportes disponibles</td>
+          </tr>
+        `;
+      }
+
+      async function generateReportsPdf() {
+        if (!currentReports.length) {
+          alert('No hay datos de baches para generar el PDF.');
+          return;
+        }
+
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          alert('No se pudo cargar el generador PDF.');
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+        const now = new Date();
+        const generatedAt = now.toLocaleString('es-MX', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(15);
+        doc.text('Reporte de baches por municipio y calle', 14, 14);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`Generado: ${generatedAt}`, 14, 20);
+        doc.text(`Total de reportes: ${currentReports.length}`, 14, 25);
+
+        const bodyRows = currentReports.map((report, index) => {
+          const locationInfo = parseStreetAndMunicipality(report.location);
+          return [
+            String(index + 1),
+            String(report.id || '-'),
+            locationInfo.municipality,
+            locationInfo.street,
+            String(report.title || 'Sin titulo'),
+            getPriorityLabel(report),
+            String(report.status || 'Sin estado'),
+            String(report.userName || 'Ciudadano'),
+            String(report.createdAt || '').substring(0, 10) || '-',
+          ];
+        });
+
+        doc.autoTable({
+          startY: 30,
+          head: [['#', 'Folio', 'Municipio', 'Calle/Zona', 'Descripcion', 'Prioridad', 'Estado', 'Reportado por', 'Fecha']],
+          body: bodyRows,
+          styles: {
+            fontSize: 8.5,
+            cellPadding: 1.8,
+            overflow: 'linebreak',
+          },
+          headStyles: {
+            fillColor: [122, 9, 51],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+          },
+          alternateRowStyles: {
+            fillColor: [248, 249, 250],
+          },
+          columnStyles: {
+            0: { cellWidth: 8 },
+            1: { cellWidth: 24 },
+            2: { cellWidth: 34 },
+            3: { cellWidth: 48 },
+            4: { cellWidth: 62 },
+            5: { cellWidth: 20 },
+            6: { cellWidth: 24 },
+            7: { cellWidth: 34 },
+            8: { cellWidth: 20 },
+          },
+          didDrawPage: (data) => {
+            const pageCount = doc.internal.getNumberOfPages();
+            doc.setFontSize(8);
+            doc.text(
+              `Pagina ${data.pageNumber} de ${pageCount}`,
+              data.settings.margin.left,
+              doc.internal.pageSize.getHeight() - 5
+            );
+          },
+          margin: { top: 30, left: 10, right: 10, bottom: 10 },
+        });
+
+        doc.save(`reporte_baches_${now.toISOString().slice(0, 10)}.pdf`);
+      }
 
       const reportsGeoMap = L.map('reportsGeoMap', {
         zoomControl: false,
@@ -590,6 +704,8 @@
       async function loadReports() {
         const response = await fetch(`${apiBase}/reports`);
         const reports = response.ok ? await response.json() : [];
+        currentReports = reports;
+        renderMunicipalitySummary(reports);
 
         tableBody.innerHTML = reports.map((report) => {
           const safeId = String(report.id || '').replace(/"/g, '&quot;');
@@ -635,6 +751,8 @@
           });
         });
       }
+
+      generatePdfBtn.addEventListener('click', generateReportsPdf);
 
       loadReportsMapData();
       loadReports();
