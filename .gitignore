@@ -33,6 +33,10 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Backend local runtime files
+backend/.env
+backend/uploads/
+
 # Symbolication related
 app.*.symbols
 
