@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet" />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+              "tertiary-fixed-dim": "#e9c349",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed-variant": "#89173d",
+              "on-background": "#191c1d",
+              "on-secondary-fixed": "#1b1c1c",
+              "error": "#ba1a1a",
+              "on-primary-fixed": "#3f0016",
+              "surface": "#f8f9fa",
+              "surface-container-high": "#e7e8e9",
+              "on-primary-container": "#ffb3c1",
+              "surface-container": "#edeeef",
+              "surface-container-low": "#f3f4f5",
+              "tertiary-container": "#cba72f",
+              "outline-variant": "#ddbfc3",
+              "primary-fixed-dim": "#ffb2bf",
+              "on-tertiary": "#ffffff",
+              "primary-fixed": "#ffd9de",
+              "on-tertiary-container": "#4e3d00",
+              "on-secondary-fixed-variant": "#474747",
+              "on-tertiary-fixed": "#241a00",
+              "outline": "#8a7174",
+              "on-primary": "#ffffff",
+              "on-secondary-container": "#646464",
+              "on-tertiary-fixed-variant": "#574500",
+              "primary-container": "#9a2649",
+              "on-surface": "#191c1d",
+              "on-error": "#ffffff",
+              "surface-bright": "#f8f9fa",
+              "error-container": "#ffdad6",
+              "tertiary-fixed": "#ffe088",
+              "secondary-fixed": "#e4e2e2",
+              "secondary-fixed-dim": "#c8c6c6",
+              "surface-variant": "#e1e3e4",
+              "surface-tint": "#a93154",
+              "inverse-on-surface": "#f0f1f2",
+              "on-error-container": "#93000a",
+              "secondary-container": "#e4e2e2",
+              "surface-container-highest": "#e1e3e4",
+              "tertiary": "#735c00",
+              "inverse-primary": "#ffb2bf",
+              "primary": "#7a0933",
+              "on-surface-variant": "#574145",
+              "background": "#f8f9fa",
+              "surface-container-lowest": "#ffffff",
+              "inverse-surface": "#2e3132",
+              "secondary": "#5e5e5e",
+              "surface-dim": "#d9dadb"
+            },
+            "borderRadius": {
+              "DEFAULT": "0.125rem",
+              "lg": "0.25rem",
+              "xl": "0.5rem",
+              "full": "0.75rem"
+            },
+            "spacing": {
+              "gutter": "24px",
+              "stack-md": "16px",
+              "container-max": "1440px",
+              "stack-sm": "8px",
+              "margin-desktop": "32px",
+              "stack-lg": "24px",
+              "margin-mobile": "16px",
+              "sidebar-width": "280px"
+            },
+            "fontFamily": {
+              "label-md": ["Inter"],
+              "h3": ["Inter"],
+              "data-mono": ["Inter"],
+              "body-lg": ["Inter"],
+              "h2": ["Inter"],
+              "h1": ["Inter"],
+              "body-md": ["Inter"]
+            },
+            "fontSize": {
+              "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+              "h3": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+              "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "500" }],
+              "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+              "h2": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+              "h1": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+              "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+  </head>
+
+  <body class="bg-background text-on-background min-h-screen">
+    <!-- SideNavBar Shell -->
+    <aside
+      class="fixed left-0 top-0 h-full w-sidebar-width bg-primary text-on-primary border-r border-outline-variant flex flex-col h-full pt-stack-lg pb-0 z-50">
+      <div class="px-margin-mobile mb-stack-lg">
+        <h3 class="font-h3 text-h3 font-bold text-white">Oaxaca de Juárez</h3>
+        <p class="font-label-md text-label-md text-white/70">Sistema de Mantenimiento Vial</p>
+      </div>
+      <nav class="flex-1">
+        <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+          href="dashboard_mapa_de_incidencias.html">
+          <span class="material-symbols-outlined" data-icon="map">map</span>
+          <span class="font-label-md text-label-md">Panel de Control</span>
+        </a>
+        <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+          href="reportes_ejecutivos.html">
+          <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+          <span class="font-label-md text-label-md">Reportes</span>
+        </a>
+        <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md bg-primary text-on-primary border-l-4 border-on-primary-fixed scale-[0.99] transition-transform"
+          href="feed_de_actualizaciones.html">
+          <span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
+          <span class="font-label-md text-label-md">Actualizaciones</span>
+        </a>
+        <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+          href="configuracion_del_sistema.html">
+          <span class="material-symbols-outlined" data-icon="settings">settings</span>
+          <span class="font-label-md text-label-md">Configuracion</span>
+        </a>
+      </nav>
+      <div class="mt-auto">
+        <img alt="Gobierno de Oaxaca" class="block w-full max-w-[180px]" src="oaxacagob.png" />
+      </div>
+    </aside>
+    <!-- TopAppBar Shell -->
+    <header
+      class="fixed top-0 right-0 z-40 w-[calc(100%-280px)] h-16 bg-[#6b1834] text-white border-b border-white/10 flex justify-between items-center px-margin-desktop w-full">
+      <div class="flex items-center gap-stack-lg">
+        <h2 class="font-h2 text-h2 text-white">Actualizaciones</h2>
+      </div>
+      <div class="flex items-center gap-stack-lg">
+        <div class="flex items-center gap-stack-md">
+          <button class="p-2 text-white/90 hover:bg-white/10 transition-colors rounded-full">
+            <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+          </button>
+          <button class="p-2 text-white/90 hover:bg-white/10 transition-colors rounded-full">
+            <span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+          </button>
+        </div>
+        <div class="h-8 w-[1px] bg-white/30"></div>
+        <div class="flex items-center gap-stack-sm">
+          <img alt="User Administrator Profile" class="w-8 h-8 rounded-full object-cover border border-outline-variant"
+            data-alt="A professional headshot of a municipal administrator in a clean office setting. The lighting is soft and natural, emphasizing a professional and trustworthy demeanor. The overall aesthetic is modern, corporate, and clean, aligning with a high-end government software interface with a palette of whites and subtle grays."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiPJPdxUEJIGgZRQV-2tZ38f3uT868WEcbJ-wT3_kmwReqP8yw8_npXP7jDj7CsngC7WrB0d7Do7n7MAwsHYlq7Yo0Px4qGu2DeUZlXZPENnCSBtz1BOl05XYC83XV8xDtqvCJr4aQpegNSb8o1wAdZkFMHm0Y4i0bag9cXCV3xrK9QDf1IatRfqMpUGar4jcvpIq0KUxwkgQ4eRYvrUObsVSQXU2kdaGXWBuABArwC0kb3eKVJ76EkW-s77HU7_epvtz9mMK40B8" />
+          <span class="font-label-md text-label-md text-white">Lic. R. Méndez</span>
+        </div>
+      </div>
+    </header>
+    <!-- Main Content Canvas -->
+    <main class="ml-[280px] pt-16 min-h-screen">
+      <div class="max-w-container-max mx-auto p-margin-desktop">
+        <!-- Feed Header & Controls -->
+        <div class="flex justify-between items-end mb-gutter">
+          <div>
+            <h1 class="font-h1 text-h1 text-on-surface mb-2">Bitácora de Obra</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Seguimiento cronológico de las
+              intervenciones de bacheo y mantenimiento vial en el municipio de Oaxaca de Juárez.</p>
+          </div>
+          <button
+            class="flex items-center gap-stack-sm bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-[0.98] transition-all shadow-md">
+            <span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+            Nueva Publicación
+          </button>
+        </div>
+        <!-- Bento-style Grid Feed -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+          <!-- Card 1: Major Repair -->
+          <article
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col shadow-sm group">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute top-4 left-4 z-10">
+                <span
+                  class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-md text-[10px] uppercase tracking-widest shadow-sm">Terminado</span>
+              </div>
+              <img alt="Reparación en Avenida Juárez"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                data-alt="A high-resolution photograph of a freshly repaired road surface in a colonial city environment. Workers in bright safety vests are finishing the asphalt under warm afternoon sunlight. The scene captures the historic architecture of Oaxaca in the background, maintaining a professional and institutional aesthetic with clear, sharp details and a focus on municipal efficiency."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQy4wV6L70CoKFCPZovKfjNlFFALMRHSZPXHxNF9SBtPpRViLsTUIZ17-wKdxZBk6TqN7gFxz-pPDw0D2K4SMBjEs12CR0lgxHnuptrEj26CHgIWaY2QbEgPNo1tO2axzJ6VfwBrr87U620LwZ8-0M3XYtwFd-lLZYOrWtNRU84QyddTQDLK9_SWrLQa6_EMGMEC3NVY6z5eOi52FO1MrvzNRBsCTS-njq5Oy4J2YQOCRYblR8_wRnoWm3S9_cavB1xXvLUQUY8ng" />
+            </div>
+            <div class="p-stack-lg flex-1 flex flex-col">
+              <div class="flex items-center justify-between mb-stack-sm">
+                <span class="font-label-md text-label-md text-primary">Av. Juárez / Centro Histórico</span>
+                <span class="font-data-mono text-data-mono text-on-surface-variant">24 Oct 2023</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-on-surface mb-stack-sm">Rehabilitación de carpeta asfáltica</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant mb-stack-lg flex-1">
+                Se completó la reparación profunda de un socavón de 1.5m de diámetro. El proceso incluyó excavación,
+                relleno compactado y sellado térmico para garantizar la durabilidad ante la temporada de lluvias.
+              </p>
+              <div class="flex items-center gap-stack-md pt-stack-md border-t border-outline-variant">
+                <div class="flex -space-x-2">
+                  <div
+                    class="w-8 h-8 rounded-full border-2 border-surface bg-tertiary-container flex items-center justify-center text-[10px] font-bold text-on-tertiary-container">
+                    RM</div>
+                  <div
+                    class="w-8 h-8 rounded-full border-2 border-surface bg-secondary-container flex items-center justify-center text-[10px] font-bold text-on-secondary-container">
+                    JG</div>
+                </div>
+                <span class="font-label-md text-[10px] text-on-surface-variant uppercase">Cuadrilla 04</span>
+              </div>
+            </div>
+          </article>
+          <!-- Card 2: Urgent Ongoing -->
+          <article
+            class="bg-surface-container-lowest border-t-4 border-t-error border-x border-b border-outline-variant rounded-xl overflow-hidden flex flex-col shadow-sm group">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute top-4 left-4 z-10">
+                <span
+                  class="bg-error text-on-error px-3 py-1 rounded-full font-label-md text-[10px] uppercase tracking-widest shadow-sm">En
+                  Progreso</span>
+              </div>
+              <img alt="Intervención Urgente"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                data-alt="A detailed shot of construction equipment on a municipal street during a road repair operation. The lighting is bright and direct, highlighting the textures of raw asphalt and yellow machinery. The background shows a modern street layout, emphasizing a professional, hard-working municipal atmosphere with high-contrast colors and institutional clarity."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXnQb07VEAk_BWONzwyq4PrEJ_OAOfkHtgY_rzD8TBF4AMcuXFSlOXeZyayO6fRDvvwxvLHjuveZhE1W49lP1DUfWD-BwyS2d11uZkrEk64ifBZe2HPyzIwGeIB8YlJ6TQyEGfMJI1Q6S_5Bfuw_DbZCKtsYMc29gXq3rHcWu2GCv6uHQcRmUKGAcYkEIyqdww3Os7n8fOY8gXPjN1rc4lgIP96zfCfuAhXW5VGw11nWFNhhGt9Qe1fWS5-k7vJ7kTsjWMabHhv90" />
+            </div>
+            <div class="p-stack-lg flex-1 flex flex-col">
+              <div class="flex items-center justify-between mb-stack-sm">
+                <span class="font-label-md text-label-md text-error">Calz. Madero</span>
+                <span class="font-data-mono text-data-mono text-on-surface-variant">25 Oct 2023</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-on-surface mb-stack-sm">Atención inmediata a bache crítico</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant mb-stack-lg flex-1">
+                Reporte ciudadano #8821. Se encuentra en etapa de nivelación. La zona permanece parcialmente cerrada a
+                la circulación. Se estima la finalización para el turno nocturno de hoy.
+              </p>
+              <div class="flex items-center gap-stack-md pt-stack-md border-t border-outline-variant">
+                <div
+                  class="w-8 h-8 rounded-full border-2 border-surface bg-primary-container flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[16px] text-on-primary-container"
+                    data-icon="engineering">engineering</span>
+                </div>
+                <span class="font-label-md text-[10px] text-on-surface-variant uppercase">Brigada de Reacción
+                  Rápida</span>
+              </div>
+            </div>
+          </article>
+          <!-- Card 3: Report with Sparkline logic -->
+          <article
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col shadow-sm group">
+            <div class="relative h-56 overflow-hidden">
+              <div class="absolute top-4 left-4 z-10">
+                <span
+                  class="bg-secondary text-on-secondary px-3 py-1 rounded-full font-label-md text-[10px] uppercase tracking-widest shadow-sm">Inspección</span>
+              </div>
+              <img alt="Inspección de Vialidad"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                data-alt="A wide-angle professional shot of a clean, paved city street in Oaxaca de Juárez. The colonial architecture provides a scenic backdrop under a clear blue sky. The photo is taken from a low angle to emphasize the road quality, reflecting a successful municipal maintenance project with a clean, orderly, and bright visual style."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD10GDnFcIHHl4nWtt93IWrQyHFDdQ77V0HgJRASaRDer45zmnwJ8QBh-izata0IDSNnVj1lUyVfA12KEBRgfJbXcSBSoPFFkxJWIMAGOA13wADb4386MQQ4gXGSigZRMUJbqNYSBpt75sAYWYRFA-jDMqONAUVMAclF-5rJigVvgWBnFFLB2d5lO1d8cMUS5Gbqy7K4VpaXiozwmX3krH9s0ysFc8pIIh_mWPXp_ce8apu9eQQ4skxUDCCr_OqPpTHGAwlVYUBtrM" />
+            </div>
+            <div class="p-stack-lg flex-1 flex flex-col">
+              <div class="flex items-center justify-between mb-stack-sm">
+                <span class="font-label-md text-label-md text-secondary">Colonia Reforma</span>
+                <span class="font-data-mono text-data-mono text-on-surface-variant">23 Oct 2023</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-on-surface mb-stack-sm">Supervisión post-intervención</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant mb-stack-lg flex-1">
+                Validación de calidad en la calle Jazmines. Se observa un sellado uniforme sin filtraciones. Se cierra
+                el ticket de mantenimiento programado satisfactoriamente.
+              </p>
+              <div class="flex items-center gap-stack-md pt-stack-md border-t border-outline-variant justify-between">
+                <div class="flex items-center gap-stack-sm">
+                  <div class="w-2 h-2 rounded-full bg-tertiary"></div>
+                  <span class="font-label-md text-[10px] text-on-surface-variant uppercase">Control de Calidad</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <div class="h-4 w-1 bg-primary/20 rounded-full"></div>
+                  <div class="h-6 w-1 bg-primary/40 rounded-full"></div>
+                  <div class="h-8 w-1 bg-primary/60 rounded-full"></div>
+                  <div class="h-5 w-1 bg-primary rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+          <!-- Card 4 -->
+          <article
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col shadow-sm group">
+            <div class="relative h-56 overflow-hidden">
+              <img alt="Mantenimiento preventivo"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                data-alt="A focused image of a municipal vehicle equipped for road maintenance parked on a clean street. The vehicle is branded with subtle municipal logos. The lighting is crisp morning sun, creating sharp shadows and a feeling of early daily duty. The aesthetic is institutional and organized, using professional photography standards."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1nDXx2F7t3KZzfWfOoPCYpTjp39N6nN9R7k3hZUSkBlLEkYPn_UTxolGcDp6lzXzPa17Uqk3x6knBWm_u9rWhaWEkuBuoC2G9vvsfQa1xKJGA0s-eUNjlvxQuZSgMegSozWFQs7mS6FTna5dXclw79bqJGKMDtd2fUCkJY_XVNWf3omnmQglw2LAgspoy4vlZvywSNavjcNPMRI2yky9YRIQlR-kY_t1kqoU8auW736X_5So5yoN60IQ1HT90FR0m4OIeLQwxf98" />
+            </div>
+            <div class="p-stack-lg flex-1 flex flex-col">
+              <div class="flex items-center justify-between mb-stack-sm">
+                <span class="font-label-md text-label-md text-primary">Barrio de Jalatlaco</span>
+                <span class="font-data-mono text-data-mono text-on-surface-variant">22 Oct 2023</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-on-surface mb-stack-sm">Limpieza y bacheo preventivo</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant mb-stack-lg flex-1">
+                Acciones coordinadas para el mantenimiento de calles empedradas. Se aplicó mortero especial para
+                respetar la estética histórica de la zona.
+              </p>
+              <div class="flex items-center gap-stack-md pt-stack-md border-t border-outline-variant">
+                <span class="font-label-md text-[10px] text-on-surface-variant uppercase">Especialistas en
+                  Patrimonio</span>
+              </div>
+            </div>
+          </article>
+          <!-- Card 5 -->
+          <article
+            class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col shadow-sm group">
+            <div class="relative h-56 overflow-hidden">
+              <img alt="Materiales de construcción"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                data-alt="An industrial-style photograph showing a stockpile of high-quality asphalt and gravel materials at a municipal depot. The scene is lit with bright, industrial warehouse lighting, highlighting textures of the materials. The mood is functional and efficient, part of a professional logistics workflow for city infrastructure."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_sM1E055Cr6K5SUmrAh9O4Dh4CV9sCVLVDzSDhpjeaHcqxYnYqmJ0o8_L_E_vLDjj8r3YOO39OANQQQ8j60acWiasAtYaRHiPVP17cYs478uN3Sh2xA8Q4qdau0t--SUydJeQJW0SZmJKg81Ns837nfl5ighYjvqFbJuOPyW83EHk97mLmYi3jmrC0MjMgkNaeFmHY9wAhCcrNiSM837HnXpWzR80VPCHBgBBDvPQvV9TtgjFQC59Bbffe3VS7LzcV4i7qaxUfZM" />
+            </div>
+            <div class="p-stack-lg flex-1 flex flex-col">
+              <div class="flex items-center justify-between mb-stack-sm">
+                <span class="font-label-md text-label-md text-primary">Logística Central</span>
+                <span class="font-data-mono text-data-mono text-on-surface-variant">21 Oct 2023</span>
+              </div>
+              <h3 class="font-h3 text-h3 text-on-surface mb-stack-sm">Abastecimiento de Mezcla Asfáltica</h3>
+              <p class="font-body-md text-body-md text-on-surface-variant mb-stack-lg flex-1">
+                Recepción de 50 toneladas de mezcla AC-20 para las jornadas de fin de semana. Verificación de
+                temperatura y granulometría cumplida según norma oficial.
+              </p>
+              <div class="flex items-center gap-stack-md pt-stack-md border-t border-outline-variant">
+                <span class="font-label-md text-[10px] text-on-surface-variant uppercase">Departamento de
+                  Suministros</span>
+              </div>
+            </div>
+          </article>
+          <!-- Empty State / New Entry Placeholder -->
+          <div
+            class="border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center p-gutter text-center bg-surface-container-low hover:bg-surface-container-high transition-colors cursor-pointer group">
+            <div
+              class="w-16 h-16 rounded-full bg-outline-variant/20 flex items-center justify-center mb-stack-md group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-4xl text-on-surface-variant"
+                data-icon="post_add">post_add</span>
+            </div>
+            <h3 class="font-h3 text-h3 text-on-surface mb-2">Añadir entrada</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant">Registra un nuevo avance en la bitácora
+              municipal.</p>
+          </div>
+        </div>
+        <!-- Footer Stats -->
+        <footer class="mt-gutter pt-gutter border-t border-outline-variant flex flex-wrap gap-gutter">
+          <div
+            class="flex-1 min-w-[200px] bg-surface-container-lowest p-stack-lg border border-outline-variant rounded-lg">
+            <span class="font-label-md text-label-md text-on-surface-variant block mb-2 uppercase">Total Octubre</span>
+            <div class="flex items-baseline gap-stack-sm">
+              <span class="font-h1 text-h1 text-primary">124</span>
+              <span class="font-label-md text-label-md text-tertiary">Intervenciones</span>
+            </div>
+          </div>
+          <div
+            class="flex-1 min-w-[200px] bg-surface-container-lowest p-stack-lg border border-outline-variant rounded-lg">
+            <span class="font-label-md text-label-md text-on-surface-variant block mb-2 uppercase">Eficiencia</span>
+            <div class="flex items-baseline gap-stack-sm">
+              <span class="font-h1 text-h1 text-primary">92%</span>
+              <span class="font-label-md text-label-md text-tertiary">Atención reportes</span>
+            </div>
+          </div>
+          <div
+            class="flex-1 min-w-[200px] bg-surface-container-lowest p-stack-lg border border-outline-variant rounded-lg">
+            <span class="font-label-md text-label-md text-on-surface-variant block mb-2 uppercase">Inversión
+              Mensual</span>
+            <div class="flex items-baseline gap-stack-sm">
+              <span class="font-h1 text-h1 text-primary">$2.4M</span>
+              <span class="font-label-md text-label-md text-tertiary">MXN</span>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </main>
+    <footer class="ml-[280px] bg-[#6b1834] text-white">
+      <div class="max-w-container-max mx-auto px-margin-desktop py-gutter grid grid-cols-1 md:grid-cols-4 gap-gutter">
+        <div>
+          <img alt="Gobierno de Mexico" class="w-[180px] mb-4" src="mexico.png" />
+        </div>
+        <div>
+          <h3 class="font-h3 text-h3 mb-3">Enlaces</h3>
+          <ul class="space-y-2 text-body-md">
+            <li><a class="hover:underline" href="#">Participa</a></li>
+            <li><a class="hover:underline" href="#">Marco juridico</a></li>
+            <li><a class="hover:underline" href="#">Plataforma Nacional de Transparencia</a></li>
+            <li><a class="hover:underline" href="#">Transparencia para el pueblo</a></li>
+            <li><a class="hover:underline" href="#">Alerta</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-h3 text-h3 mb-3">¿Que es gob.mx?</h3>
+          <p class="text-body-md mb-4">Es el portal unico de tramites, informacion y participacion ciudadana. <a
+              class="underline" href="#">Leer mas</a></p>
+          <ul class="space-y-2 text-body-md">
+            <li><a class="hover:underline" href="#">Portal de datos abiertos</a></li>
+            <li><a class="hover:underline" href="#">Declaracion de Accesibilidad</a></li>
+            <li><a class="hover:underline" href="#">Terminos y Condiciones</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-h3 text-h3 mb-3">Denuncia contra servidores publicos</h3>
+          <h4 class="font-h3 text-h3 mt-6 mb-3">Siguenos en</h4>
+          <div class="flex items-center gap-3 text-body-md mb-6">
+            <a class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="Facebook" href="#">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M13.5 8.5H15V6h-2.5C10.57 6 9 7.57 9 9.5V12H7v2.5h2V20h2.5v-5.5h2l.5-2.5h-2.5V9.5c0-.55.45-1 1-1z" />
+              </svg>
+            </a>
+            <a class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="X" href="#">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M4 4h3.3l4.6 5.5L17.2 4H20l-6.6 7.6L20 20h-3.3l-5-6.1L6.6 20H4l7-8.2L4 4z" />
+              </svg>
+            </a>
+            <a class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="Instagram" href="#">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                aria-hidden="true">
+                <rect x="5" y="5" width="14" height="14" rx="4" />
+                <circle cx="12" cy="12" r="3.5" />
+                <circle cx="16.5" cy="7.5" r="1" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            <a class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              aria-label="YouTube" href="#">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M21 7.8a3 3 0 0 0-2.1-2.1C17 5.2 12 5.2 12 5.2s-5 0-6.9.5A3 3 0 0 0 3 7.8C2.5 9.7 2.5 12 2.5 12s0 2.3.5 4.2a3 3 0 0 0 2.1 2.1c1.9.5 6.9.5 6.9.5s5 0 6.9-.5a3 3 0 0 0 2.1-2.1c.5-1.9.5-4.2.5-4.2s0-2.3-.5-4.2z" />
+                <path d="M10 9.5v5l4.5-2.5L10 9.5z" fill="#6b1834" />
+              </svg>
+            </a>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">*</div>
+            <div>
+              <p class="font-h3 text-h3">079</p>
+              <p class="text-body-md">Comunicat e, estamos para ayudarte</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+
+</html>
