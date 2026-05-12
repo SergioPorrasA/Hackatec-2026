@@ -113,7 +113,8 @@ function getRiskByCount(count) {
 }
 
 async function buildRiskZones() {
-  const reports = await Report.find({ category: 'bache' }).lean();
+  // Only consider active (non-finalized) bache reports when building risk zones.
+  const reports = await Report.find({ category: 'bache', status: { $ne: 'Finalizado' } }).lean();
 
   const buckets = new Map();
   for (const report of reports) {
@@ -178,7 +179,8 @@ app.get('/reports', async (req, res) => {
 });
 
 app.get('/reports/map', async (_req, res) => {
-  const reports = await Report.find({ category: 'bache' }).sort({ createdAt: -1 }).lean();
+  // Return only active (non-finalized) bache reports for map display.
+  const reports = await Report.find({ category: 'bache', status: { $ne: 'Finalizado' } }).sort({ createdAt: -1 }).lean();
   return res.json(
     reports.map((report) => ({
       id: report.reportId,
@@ -301,19 +303,33 @@ app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
 });
 
 app.post('/auth/login', (req, res) => {
-  const { email } = req.body;
+  const {
+    email,
+    username,
+    user,
+    phone,
+    password,
+  } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ message: 'email is required' });
+  const resolvedUser = (username || user || email || '').trim();
+  const resolvedPhone = String(phone || '').trim();
+  const resolvedPassword = String(password || '').trim();
+
+  if (!resolvedUser || !resolvedPhone || !resolvedPassword) {
+    return res.status(400).json({
+      message: 'username/user, phone y password son requeridos',
+    });
   }
 
-  const isAdmin = email.toLowerCase().includes('admin');
+  const isAdmin = resolvedUser.toLowerCase().includes('admin');
   return res.json({
     token: isAdmin ? adminToken : 'demo-token',
     user: {
       id: isAdmin ? 'admin-1' : 'user-1',
-      name: isAdmin ? 'Administrador Oaxaca' : 'Alejandro Ramírez',
-      email,
+      name: isAdmin ? 'Administrador Oaxaca' : resolvedUser,
+      username: resolvedUser,
+      phone: resolvedPhone,
+      email: email || `${resolvedPhone}@oaxaca.local`,
       city: 'Oaxaca de Juárez',
       role: isAdmin ? 'admin' : 'user',
     },

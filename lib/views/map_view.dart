@@ -137,6 +137,14 @@ class _MapViewState extends State<MapView> {
                 flags: InteractiveFlag.all,
                 scrollWheelVelocity: 0.01,
               ),
+              onPositionChanged: (mapPosition, _) {
+                final z = mapPosition.zoom;
+                if (z != _zoom) {
+                  setState(() {
+                    _zoom = z;
+                  });
+                }
+              },
             ),
             children: [
               TileLayer(
@@ -147,13 +155,21 @@ class _MapViewState extends State<MapView> {
               CircleLayer(
                 circles: _zones
                     .map(
-                      (zone) => CircleMarker(
-                        point: zone.point,
-                        radius: zone.radius.toDouble(),
-                        color: zone.color.withAlpha(48),
-                        borderColor: zone.color,
-                        borderStrokeWidth: 2,
-                      ),
+                      (zone) {
+                        final pixelRadius = _metersToPixels(
+                          zone.radius.toDouble(),
+                          zone.point.latitude,
+                          _zoom,
+                        );
+                        final capped = pixelRadius.clamp(8.0, 400.0).toDouble();
+                        return CircleMarker(
+                          point: zone.point,
+                          radius: capped,
+                          color: zone.color.withAlpha(48),
+                          borderColor: zone.color,
+                          borderStrokeWidth: 2,
+                        );
+                      },
                     )
                     .toList(),
               ),
@@ -277,6 +293,13 @@ class _MapViewState extends State<MapView> {
     );
   }
 }
+
+  double _metersToPixels(double meters, double lat, double zoom) {
+    // Web Mercator approximate meters per pixel at latitude
+    final metersPerPixel = 156543.03392 * math.cos(lat * math.pi / 180) / math.pow(2, zoom);
+    if (metersPerPixel <= 0) return meters; // fallback
+    return meters / metersPerPixel;
+  }
 
 class _IncidentZone {
   const _IncidentZone({

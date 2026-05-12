@@ -28,12 +28,6 @@ class ApiService {
 
   static String get baseUrl => _baseUrls.first;
 
-  static Uri _uri(String path, [Map<String, dynamic>? query]) {
-    return Uri.parse('$baseUrl$path').replace(
-      queryParameters: query?.map((key, value) => MapEntry(key, value.toString())),
-    );
-  }
-
   static Future<http.Response> _getWithFallback(
     String path, {
     Map<String, dynamic>? query,
@@ -133,5 +127,27 @@ class ApiService {
     }
     final data = jsonDecode(response.body) as List<dynamic>;
     return data.cast<Map<String, dynamic>>();
+  }
+
+  static Future<Map<String, dynamic>> login({
+    required String username,
+    required String phone,
+    required String password,
+  }) async {
+    final response = await _postWithFallback(
+      '/auth/login',
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': username,
+        'phone': phone,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('No se pudo iniciar sesión');
+    }
+
+    return jsonDecode(response.body) as Map<String, dynamic>;
   }
 }

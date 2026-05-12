@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ProfileView extends StatefulWidget {
-  const ProfileView({super.key});
+  const ProfileView({super.key, required this.user, required this.onLogout});
+
+  final Map<String, dynamic> user;
+  final VoidCallback onLogout;
 
   @override
   State<ProfileView> createState() => _ProfileViewState();
@@ -70,8 +73,8 @@ class _ProfileViewState extends State<ProfileView> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Alejandro Ramírez',
+                  Text(
+                    (widget.user['name'] as String?) ?? 'Usuario',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -79,8 +82,8 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Cuenta verificada • Oaxaca de Juárez',
+                  Text(
+                    '${(widget.user['phone'] as String?) ?? 'Sin teléfono'} • ${(widget.user['city'] as String?) ?? 'Oaxaca de Juárez'}',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
@@ -159,7 +162,7 @@ class _ProfileViewState extends State<ProfileView> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: widget.onLogout,
                 icon: const Icon(Icons.logout),
                 label: const Text('Cerrar sesión'),
                 style: OutlinedButton.styleFrom(

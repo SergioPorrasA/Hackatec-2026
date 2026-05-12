@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'views/feed_view.dart';
+import 'views/login_view.dart';
 import 'views/map_view.dart';
 import 'views/report_view.dart';
 import 'views/status_view.dart';
@@ -22,13 +23,52 @@ class OaxacaReportaApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFFCFAF2),
       ),
       debugShowCheckedModeBanner: false,
-      home: const MainApp(),
+      home: const AppGate(),
+    );
+  }
+}
+
+class AppGate extends StatefulWidget {
+  const AppGate({super.key});
+
+  @override
+  State<AppGate> createState() => _AppGateState();
+}
+
+class _AppGateState extends State<AppGate> {
+  Map<String, dynamic>? _user;
+
+  Future<void> _handleLogin(Map<String, dynamic> user) async {
+    if (!mounted) return;
+    setState(() {
+      _user = user;
+    });
+  }
+
+  void _handleLogout() {
+    setState(() {
+      _user = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_user == null) {
+      return LoginView(onLogin: _handleLogin);
+    }
+
+    return MainApp(
+      user: _user!,
+      onLogout: _handleLogout,
     );
   }
 }
 
 class MainApp extends StatefulWidget {
-  const MainApp({super.key});
+  const MainApp({super.key, required this.user, required this.onLogout});
+
+  final Map<String, dynamic> user;
+  final VoidCallback onLogout;
 
   @override
   State<MainApp> createState() => _MainAppState();
@@ -42,7 +82,8 @@ class _MainAppState extends State<MainApp> {
     const MapView(),
     const ReportView(),
     const StatusView(),
-    const ProfileView(),
+    // ProfileView receives runtime data from the login gate.
+    const SizedBox.shrink(),
   ];
 
   void _onItemTapped(int index) {
@@ -53,8 +94,13 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
+    final profileView = ProfileView(
+      user: widget.user,
+      onLogout: widget.onLogout,
+    );
+
     return Scaffold(
-      body: _views[_selectedIndex],
+      body: _selectedIndex == 4 ? profileView : _views[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

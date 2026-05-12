@@ -244,39 +244,41 @@ class _ReportViewState extends State<ReportView> {
   }
 
   void _showCurrentLocationSheet(BuildContext context) {
+    LatLng currentLocation = const LatLng(17.0732, -96.7266);
+    String currentPlaceName = '';
+    bool isLoading = true;
+    bool hasRequestedLocation = false;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (sheetContext) => StatefulBuilder(
         builder: (sheetContext, localSetState) {
-          LatLng currentLocation = const LatLng(17.0732, -96.7266);
-          String currentPlaceName = '';
-          bool isLoading = true;
+          Future<void> loadCurrentLocation() async {
+            if (hasRequestedLocation) return;
+            hasRequestedLocation = true;
 
-          // Cargar la ubicación actual cuando la sheet se abre
-          Future.microtask(() async {
-            bool hasValidLocation = false;
             final location = await _getCurrentLocation();
-            if (location != null && mounted) {
+            if (!mounted) return;
+
+            if (location != null) {
+              final placeName = await _getPlaceName(location);
+              if (!mounted) return;
               localSetState(() {
                 currentLocation = location;
-                hasValidLocation = true;
+                currentPlaceName = placeName;
+                isLoading = false;
               });
-              final placeName = await _getPlaceName(location);
-              if (mounted) {
-                localSetState(() {
-                  currentPlaceName = placeName;
-                  isLoading = false;
-                });
-              }
             } else {
-              if (mounted) {
-                localSetState(() {
-                  currentPlaceName = '';
-                  isLoading = false;
-                });
-              }
+              localSetState(() {
+                currentPlaceName = '';
+                isLoading = false;
+              });
             }
+          }
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            loadCurrentLocation();
           });
 
           return Container(
@@ -662,16 +664,18 @@ class _ReportViewState extends State<ReportView> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
+                  final navigator = Navigator.of(sheetContext);
+                  final messenger = ScaffoldMessenger.of(context);
                   try {
                     await _submitReport(location: location, lat: lat, lng: lng);
                     if (!mounted) return;
-                    Navigator.pop(sheetContext);
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    navigator.pop();
+                    messenger.showSnackBar(
                       const SnackBar(content: Text('Reporte enviado correctamente')),
                     );
                   } catch (_) {
                     if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messenger.showSnackBar(
                       const SnackBar(content: Text('No se pudo enviar el reporte al servidor')),
                     );
                   }

@@ -183,28 +183,28 @@ class _FeedViewState extends State<FeedView> {
           Text(description, style: TextStyle(color: Colors.grey[700])),
           const SizedBox(height: 12),
           if (imageUrls.isNotEmpty)
-            SizedBox(
-              height: 84,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: imageUrls.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final rawUrl = imageUrls[index];
-                  final fullUrl = rawUrl.startsWith('http')
-                      ? rawUrl
-                      : '${ApiService.baseUrl}$rawUrl';
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      fullUrl,
-                      width: 120,
-                      height: 84,
-                      fit: BoxFit.cover,
+            Column(
+              children: imageUrls.asMap().entries.map((entry) {
+                final rawUrl = entry.value;
+                final fullUrl = rawUrl.startsWith('http')
+                    ? rawUrl
+                    : '${ApiService.baseUrl}$rawUrl';
+
+                return Padding(
+                  padding: EdgeInsets.only(bottom: entry.key == imageUrls.length - 1 ? 0 : 8),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 10,
+                      child: Image.network(
+                        fullUrl,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              }).toList(),
             )
           else
             Container(
