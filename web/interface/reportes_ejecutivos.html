@@ -513,6 +513,47 @@
           .trim();
       }
 
+      function resolvePriorityByCount(count) {
+        if (count > 10) {
+          return {
+            key: 'critica',
+            label: 'Crítica',
+            chipClass: 'bg-error text-on-error',
+            pdfColor: [186, 26, 26],
+          };
+        }
+
+        if (count >= 5) {
+          return {
+            key: 'media',
+            label: 'Media',
+            chipClass: 'bg-yellow-200 text-yellow-900',
+            pdfColor: [249, 168, 37],
+          };
+        }
+
+        return {
+          key: 'baja',
+          label: 'Baja',
+          chipClass: 'bg-green-200 text-green-900',
+          pdfColor: [46, 125, 50],
+        };
+      }
+
+      function buildLocationStats(reports) {
+        const stats = new Map();
+
+        reports.forEach((report) => {
+          const label = String(report.location || 'Sin ubicación').trim() || 'Sin ubicación';
+          const key = normalizeLocation(label) || 'sin ubicacion';
+          const current = stats.get(key) || { key, label, count: 0 };
+          current.count += 1;
+          stats.set(key, current);
+        });
+
+        return stats;
+      }
+
       function getPriorityLabel(report) {
         const raw = String(report.priority || '').trim();
         if (!raw) return 'Media';
@@ -520,17 +561,9 @@
       }
 
       function renderLocationSummary(reports) {
-        const totalsByLocation = new Map();
+        const statsByLocation = buildLocationStats(reports);
 
-        reports.forEach((report) => {
-          const rawLocation = String(report.location || 'Sin ubicación').trim() || 'Sin ubicación';
-          const key = normalizeLocation(rawLocation) || 'sin ubicacion';
-          const current = totalsByLocation.get(key) || { label: rawLocation, count: 0 };
-          current.count += 1;
-          totalsByLocation.set(key, current);
-        });
-
-        const rows = Array.from(totalsByLocation.values())
+        const rows = Array.from(statsByLocation.values())
           .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
           .map((item) => `
             <tr class="hover:bg-surface-container-lowest transition-colors">
@@ -567,6 +600,75 @@
         bacheoDonutLabel.textContent = `Bacheados ${repairedPercent}% | No bacheados ${pendingPercent}%`;
       }
 
+      function drawPdfCharts(doc, reports) {
+        const total = reports.length;
+        const repaired = reports.filter((report) => String(report.status || '').toLowerCase().includes('finalizado')).length;
+        const pending = Math.max(0, total - repaired);
+        const repairedPercent = total ? Math.round((repaired / total) * 100) : 0;
+        const pendingPercent = total ? 100 - repairedPercent : 0;
+
+        const statsByLocation = buildLocationStats(reports);
+        const priorityTotals = { critica: 0, media: 0, baja: 0 };
+
+        reports.forEach((report) => {
+          const locationLabel = String(report.location || 'Sin ubicación').trim() || 'Sin ubicación';
+          const locationKey = normalizeLocation(locationLabel) || 'sin ubicacion';
+          const locationCount = statsByLocation.get(locationKey)?.count || 1;
+          const priority = resolvePriorityByCount(locationCount);
+          priorityTotals[priority.key] += 1;
+        });
+
+        const priorityPercents = {
+          critica: total ? Math.round((priorityTotals.critica / total) * 100) : 0,
+          media: total ? Math.round((priorityTotals.media / total) * 100) : 0,
+          baja: total ? Math.round((priorityTotals.baja / total) * 100) : 0,
+        };
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('Gráficas del reporte', 14, 31);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(`Bacheados: ${repairedPercent}% (${repaired})`, 14, 38);
+        doc.text(`No bacheados: ${pendingPercent}% (${pending})`, 14, 43);
+
+        const barX = 14;
+        const barY = 46;
+        const barW = 120;
+        const barH = 6;
+        doc.setFillColor(230, 230, 230);
+        doc.rect(barX, barY, barW, barH, 'F');
+        doc.setFillColor(46, 125, 50);
+        doc.rect(barX, barY, (barW * repairedPercent) / 100, barH, 'F');
+        doc.setFillColor(186, 26, 26);
+        doc.rect(barX + (barW * repairedPercent) / 100, barY, (barW * pendingPercent) / 100, barH, 'F');
+
+        const pX = 150;
+        const pY = 38;
+        const pW = 125;
+        const pH = 8;
+        doc.text('Prioridad por color (panel de control)', pX, 33);
+        doc.setFillColor(230, 230, 230);
+        doc.rect(pX, pY, pW, pH, 'F');
+
+        const criticaW = (pW * priorityPercents.critica) / 100;
+        const mediaW = (pW * priorityPercents.media) / 100;
+        const bajaW = (pW * priorityPercents.baja) / 100;
+
+        doc.setFillColor(186, 26, 26);
+        doc.rect(pX, pY, criticaW, pH, 'F');
+        doc.setFillColor(249, 168, 37);
+        doc.rect(pX + criticaW, pY, mediaW, pH, 'F');
+        doc.setFillColor(46, 125, 50);
+        doc.rect(pX + criticaW + mediaW, pY, bajaW, pH, 'F');
+
+        doc.setFontSize(8.5);
+        doc.text(`Crítica ${priorityPercents.critica}%`, pX, pY + 14);
+        doc.text(`Media ${priorityPercents.media}%`, pX + 35, pY + 14);
+        doc.text(`Baja ${priorityPercents.baja}%`, pX + 68, pY + 14);
+      }
+
       async function generateReportsPdf() {
         if (!currentReports.length) {
           alert('No hay datos de baches para generar el PDF.');
@@ -599,13 +701,22 @@
         doc.text(`Generado: ${generatedAt}`, 14, 20);
         doc.text(`Total de reportes: ${currentReports.length}`, 14, 25);
 
+        drawPdfCharts(doc, currentReports);
+
+        const locationStats = buildLocationStats(currentReports);
+
         const bodyRows = currentReports.map((report, index) => {
+          const locationLabel = String(report.location || 'Sin ubicación').trim() || 'Sin ubicación';
+          const locationKey = normalizeLocation(locationLabel) || 'sin ubicacion';
+          const locationCount = locationStats.get(locationKey)?.count || 1;
+          const priority = resolvePriorityByCount(locationCount);
+
           return [
             String(index + 1),
             String(report.id || '-'),
-            String(report.location || 'Sin ubicación'),
+            locationLabel,
             String(report.title || 'Sin titulo'),
-            getPriorityLabel(report),
+            priority.label,
             String(report.status || 'Sin estado'),
             String(report.userName || 'Ciudadano'),
             String(report.createdAt || '').substring(0, 10) || '-',
@@ -613,7 +724,7 @@
         });
 
         doc.autoTable({
-          startY: 30,
+          startY: 60,
           head: [['#', 'Folio', 'Ubicación', 'Descripcion', 'Prioridad', 'Estado', 'Reportado por', 'Fecha']],
           body: bodyRows,
           styles: {
@@ -693,21 +804,20 @@
           let lowCount = 0;
           const heatPoints = [];
 
-          const priorityWeight = (incident) => {
-            const priority = String(incident.priority || '').toLowerCase();
-            if (priority === 'alta') return 1.0;
-            if (priority === 'media') return 0.65;
-            if (priority === 'baja') return 0.35;
-
-            const status = String(incident.status || '').toLowerCase();
-            if (status.includes('finalizado')) return 0.35;
-            if (status.includes('revisión') || status.includes('revision')) return 0.65;
-            return 1.0;
-          };
+          const locationCountMap = new Map();
+          reports.forEach((incident) => {
+            const locationLabel = String(incident.location || 'Sin ubicación').trim() || 'Sin ubicación';
+            const locationKey = normalizeLocation(locationLabel) || 'sin ubicacion';
+            locationCountMap.set(locationKey, (locationCountMap.get(locationKey) || 0) + 1);
+          });
 
           reports.forEach((incident) => {
             if (typeof incident.lat !== 'number' || typeof incident.lng !== 'number') return;
-            const weight = priorityWeight(incident);
+            const locationLabel = String(incident.location || 'Sin ubicación').trim() || 'Sin ubicación';
+            const locationKey = normalizeLocation(locationLabel) || 'sin ubicacion';
+            const locationCount = locationCountMap.get(locationKey) || 1;
+            const priority = resolvePriorityByCount(locationCount);
+            const weight = priority.key === 'critica' ? 1.0 : priority.key === 'media' ? 0.65 : 0.35;
             heatPoints.push([incident.lat, incident.lng, weight]);
 
             if (weight >= 0.95) criticalCount += 1;
@@ -748,17 +858,24 @@
         renderLocationSummary(reports);
         renderBacheoChart(reports);
 
+        const locationStats = buildLocationStats(reports);
+
         tableBody.innerHTML = reports.map((report) => {
           const safeId = String(report.id || '').replace(/"/g, '&quot;');
+          const locationLabel = String(report.location || 'Sin ubicación').trim() || 'Sin ubicación';
+          const locationKey = normalizeLocation(locationLabel) || 'sin ubicacion';
+          const locationCount = locationStats.get(locationKey)?.count || 1;
+          const priority = resolvePriorityByCount(locationCount);
+
           return `
             <tr class="hover:bg-surface-container-lowest transition-colors">
               <td class="px-stack-lg py-4 font-data-mono text-data-mono">#${report.id}</td>
               <td class="px-stack-lg py-4">
-                <p class="font-body-md font-semibold">${report.location || 'Sin ubicación'}</p>
+                <p class="font-body-md font-semibold">${locationLabel}</p>
                 <p class="text-[12px] text-on-surface-variant">${report.title || 'Sin título'}</p>
               </td>
               <td class="px-stack-lg py-4">
-                <span class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full text-[11px] font-bold">MEDIA</span>
+                <span class="${priority.chipClass} px-3 py-1 rounded-full text-[11px] font-bold">${priority.label}</span>
               </td>
               <td class="px-stack-lg py-4">
                 <select data-id="${safeId}" class="status-select border border-outline-variant rounded px-2 py-1 text-sm">
