@@ -237,9 +237,9 @@
             </div>
           </div>
           <!-- Floating Metrics Card (overlay) -->
-          <aside
+          <aside id="floatingCard"
             class="fixed w-80 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant p-stack-lg pointer-events-auto"
-            style="top:88px; right:32px; max-height: calc(100vh - 120px); overflow:auto; z-index:9999;">
+            style="top:88px; right:32px; max-height: calc(100vh - 120px); overflow:auto; z-index:9999; transition: transform 160ms ease;">
             <div class="grid grid-cols-2 gap-stack-sm">
               <div class="col-span-2 bg-primary-container/5 border border-primary-container/10 p-stack-md rounded-xl">
                 <p class="font-label-md text-primary-container text-[11px] uppercase tracking-wider mb-1">Total de
@@ -533,6 +533,33 @@
       } else {
         gpsStatus.textContent = 'Este navegador no soporta geolocalización.';
       }
+
+      // Prevent floating card overlapping footer
+      (function () {
+        const card = document.getElementById('floatingCard');
+        const footer = document.querySelector('footer');
+        if (!card || !footer) return;
+        card.style.transition = card.style.transition || 'transform 160ms ease';
+
+        function adjustCard() {
+          const footerRect = footer.getBoundingClientRect();
+          const overlap = Math.max(0, window.innerHeight - footerRect.top);
+          if (overlap > 0) {
+            card.style.transform = `translateY(-${overlap + 8}px)`;
+          } else {
+            card.style.transform = '';
+          }
+        }
+
+        window.addEventListener('scroll', adjustCard, { passive: true });
+        window.addEventListener('resize', adjustCard);
+        if ('IntersectionObserver' in window) {
+          const io = new IntersectionObserver(adjustCard);
+          io.observe(footer);
+        }
+        adjustCard();
+      })();
+
     </script>
   </body>
 
