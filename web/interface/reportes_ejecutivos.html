@@ -274,21 +274,52 @@
       </div>
       <!-- Middle Section -->
       <div class="grid grid-cols-12 gap-stack-lg mb-stack-lg">
-        <!-- Municipality Summary Table -->
+        <!-- Location Summary Table -->
         <div class="col-span-12 lg:col-span-8 bg-white p-stack-lg rounded-xl border border-outline-variant">
           <div class="flex justify-between items-center mb-stack-lg">
-            <h3 class="font-h3 text-h3 text-on-surface">Resumen por Municipio</h3>
-            <p class="font-body-md text-on-surface-variant">Número de baches reportados</p>
+            <h3 class="font-h3 text-h3 text-on-surface">Resumen por Ubicación</h3>
+            <p class="font-body-md text-on-surface-variant">Calle/Zona y total de baches reportados</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md mb-stack-md">
+            <div class="bg-surface-container-low rounded-lg p-stack-md border border-outline-variant">
+              <p class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wide mb-2">Bacheados</p>
+              <div class="flex items-end justify-between mb-2">
+                <span id="bacheadosPercent" class="font-h2 text-h2 text-on-surface">0%</span>
+                <span id="bacheadosCount" class="text-body-md text-on-surface-variant">0</span>
+              </div>
+              <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                <div id="bacheadosBar" class="h-full bg-tertiary" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="bg-surface-container-low rounded-lg p-stack-md border border-outline-variant">
+              <p class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wide mb-2">No bacheados
+              </p>
+              <div class="flex items-end justify-between mb-2">
+                <span id="noBacheadosPercent" class="font-h2 text-h2 text-on-surface">0%</span>
+                <span id="noBacheadosCount" class="text-body-md text-on-surface-variant">0</span>
+              </div>
+              <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                <div id="noBacheadosBar" class="h-full bg-error" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-stack-md flex items-center gap-stack-md">
+            <div id="bacheoDonutChart" class="w-20 h-20 rounded-full border border-outline-variant bg-surface-container"
+              style="background: conic-gradient(#2e7d32 0deg, #2e7d32 0deg, #ba1a1a 0deg, #ba1a1a 360deg);"></div>
+            <div>
+              <p class="font-body-md text-on-surface">Porcentaje de atención</p>
+              <p id="bacheoDonutLabel" class="text-[12px] text-on-surface-variant">Bacheados 0% | No bacheados 0%</p>
+            </div>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left">
               <thead>
                 <tr class="bg-surface-container-low border-b border-outline-variant">
-                  <th class="px-stack-lg py-4 font-label-md text-label-md text-on-surface-variant">MUNICIPIO</th>
+                  <th class="px-stack-lg py-4 font-label-md text-label-md text-on-surface-variant">UBICACIÓN</th>
                   <th class="px-stack-lg py-4 font-label-md text-label-md text-on-surface-variant">NÚMERO DE BACHES</th>
                 </tr>
               </thead>
-              <tbody id="municipalitySummaryBody" class="divide-y divide-outline-variant"></tbody>
+              <tbody id="locationSummaryBody" class="divide-y divide-outline-variant"></tbody>
             </table>
           </div>
           <div class="mt-stack-sm">
@@ -462,34 +493,24 @@
       const mapTilerKey = 'vho6orZjGT63tDnxKRLq';
       const reportsMapStatus = document.getElementById('reportsMapStatus');
       const generatePdfBtn = document.getElementById('generatePdfBtn');
-      const municipalitySummaryBody = document.getElementById('municipalitySummaryBody');
+      const locationSummaryBody = document.getElementById('locationSummaryBody');
+      const bacheadosPercent = document.getElementById('bacheadosPercent');
+      const noBacheadosPercent = document.getElementById('noBacheadosPercent');
+      const bacheadosCount = document.getElementById('bacheadosCount');
+      const noBacheadosCount = document.getElementById('noBacheadosCount');
+      const bacheadosBar = document.getElementById('bacheadosBar');
+      const noBacheadosBar = document.getElementById('noBacheadosBar');
+      const bacheoDonutChart = document.getElementById('bacheoDonutChart');
+      const bacheoDonutLabel = document.getElementById('bacheoDonutLabel');
       let currentReports = [];
 
-      function parseStreetAndMunicipality(locationText) {
-        const rawLocation = String(locationText || '').trim();
-        if (!rawLocation) {
-          return {
-            street: 'Sin calle',
-            municipality: 'Oaxaca de Juarez',
-          };
-        }
-
-        const chunks = rawLocation
-          .split(',')
-          .map((chunk) => chunk.trim())
-          .filter(Boolean);
-
-        if (chunks.length === 1) {
-          return {
-            street: chunks[0],
-            municipality: 'Oaxaca de Juarez',
-          };
-        }
-
-        return {
-          street: chunks[0],
-          municipality: chunks[chunks.length - 1],
-        };
+      function normalizeLocation(value) {
+        return String(value || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
       }
 
       function getPriorityLabel(report) {
@@ -498,30 +519,52 @@
         return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
       }
 
-      function renderMunicipalitySummary(reports) {
-        const totalsByMunicipality = new Map();
+      function renderLocationSummary(reports) {
+        const totalsByLocation = new Map();
 
         reports.forEach((report) => {
-          const { municipality } = parseStreetAndMunicipality(report.location);
-          const key = municipality || 'Oaxaca de Juarez';
-          totalsByMunicipality.set(key, (totalsByMunicipality.get(key) || 0) + 1);
+          const rawLocation = String(report.location || 'Sin ubicación').trim() || 'Sin ubicación';
+          const key = normalizeLocation(rawLocation) || 'sin ubicacion';
+          const current = totalsByLocation.get(key) || { label: rawLocation, count: 0 };
+          current.count += 1;
+          totalsByLocation.set(key, current);
         });
 
-        const rows = Array.from(totalsByMunicipality.entries())
-          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-          .map(([municipality, count]) => `
+        const rows = Array.from(totalsByLocation.values())
+          .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+          .map((item) => `
             <tr class="hover:bg-surface-container-lowest transition-colors">
-              <td class="px-stack-lg py-4 font-body-md text-on-surface">${municipality}</td>
-              <td class="px-stack-lg py-4 font-data-mono text-data-mono">${count}</td>
+              <td class="px-stack-lg py-4 font-body-md text-on-surface">${item.label}</td>
+              <td class="px-stack-lg py-4 font-data-mono text-data-mono">${item.count}</td>
             </tr>
           `)
           .join('');
 
-        municipalitySummaryBody.innerHTML = rows || `
+        locationSummaryBody.innerHTML = rows || `
           <tr>
             <td colspan="2" class="px-stack-lg py-4 text-on-surface-variant">Sin reportes disponibles</td>
           </tr>
         `;
+      }
+
+      function renderBacheoChart(reports) {
+        const total = reports.length;
+        const repaired = reports.filter((report) => String(report.status || '').toLowerCase().includes('finalizado')).length;
+        const pending = Math.max(0, total - repaired);
+
+        const repairedPercent = total ? Math.round((repaired / total) * 100) : 0;
+        const pendingPercent = total ? 100 - repairedPercent : 0;
+
+        bacheadosPercent.textContent = `${repairedPercent}%`;
+        noBacheadosPercent.textContent = `${pendingPercent}%`;
+        bacheadosCount.textContent = `${repaired} casos`;
+        noBacheadosCount.textContent = `${pending} casos`;
+        bacheadosBar.style.width = `${repairedPercent}%`;
+        noBacheadosBar.style.width = `${pendingPercent}%`;
+
+        const repairedDeg = Math.round((repairedPercent / 100) * 360);
+        bacheoDonutChart.style.background = `conic-gradient(#2e7d32 0deg, #2e7d32 ${repairedDeg}deg, #ba1a1a ${repairedDeg}deg, #ba1a1a 360deg)`;
+        bacheoDonutLabel.textContent = `Bacheados ${repairedPercent}% | No bacheados ${pendingPercent}%`;
       }
 
       async function generateReportsPdf() {
@@ -549,7 +592,7 @@
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(15);
-        doc.text('Reporte de baches por municipio y calle', 14, 14);
+        doc.text('Reporte de baches por ubicación', 14, 14);
 
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
@@ -557,12 +600,10 @@
         doc.text(`Total de reportes: ${currentReports.length}`, 14, 25);
 
         const bodyRows = currentReports.map((report, index) => {
-          const locationInfo = parseStreetAndMunicipality(report.location);
           return [
             String(index + 1),
             String(report.id || '-'),
-            locationInfo.municipality,
-            locationInfo.street,
+            String(report.location || 'Sin ubicación'),
             String(report.title || 'Sin titulo'),
             getPriorityLabel(report),
             String(report.status || 'Sin estado'),
@@ -573,7 +614,7 @@
 
         doc.autoTable({
           startY: 30,
-          head: [['#', 'Folio', 'Municipio', 'Calle/Zona', 'Descripcion', 'Prioridad', 'Estado', 'Reportado por', 'Fecha']],
+          head: [['#', 'Folio', 'Ubicación', 'Descripcion', 'Prioridad', 'Estado', 'Reportado por', 'Fecha']],
           body: bodyRows,
           styles: {
             fontSize: 8.5,
@@ -591,13 +632,12 @@
           columnStyles: {
             0: { cellWidth: 8 },
             1: { cellWidth: 24 },
-            2: { cellWidth: 34 },
-            3: { cellWidth: 48 },
-            4: { cellWidth: 62 },
-            5: { cellWidth: 20 },
-            6: { cellWidth: 24 },
-            7: { cellWidth: 34 },
-            8: { cellWidth: 20 },
+            2: { cellWidth: 58 },
+            3: { cellWidth: 62 },
+            4: { cellWidth: 20 },
+            5: { cellWidth: 24 },
+            6: { cellWidth: 34 },
+            7: { cellWidth: 20 },
           },
           didDrawPage: (data) => {
             const pageCount = doc.internal.getNumberOfPages();
@@ -705,7 +745,8 @@
         const response = await fetch(`${apiBase}/reports`);
         const reports = response.ok ? await response.json() : [];
         currentReports = reports;
-        renderMunicipalitySummary(reports);
+        renderLocationSummary(reports);
+        renderBacheoChart(reports);
 
         tableBody.innerHTML = reports.map((report) => {
           const safeId = String(report.id || '').replace(/"/g, '&quot;');
