@@ -1050,6 +1050,7 @@ cd<!DOCTYPE html>
 
         alert(`Publicación subida con éxito. Se actualizaron ${createdPost.updatedReportCount || 0} baches de la zona.`);
         await loadFeedPosts();
+        await loadZoneData();
       });
 
     </script>

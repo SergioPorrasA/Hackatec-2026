@@ -44,6 +44,8 @@ const reportSchema = new mongoose.Schema(
       lat: { type: Number, required: true },
       lng: { type: Number, required: true },
     },
+    zoneKey: { type: String, index: true, default: '' },
+    zoneLabel: { type: String, default: '' },
     userName: { type: String, default: 'Ciudadano' },
     userPhone: { type: String, default: '' },
     status: {
@@ -66,6 +68,8 @@ const feedPostSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     locationText: { type: String, required: true },
+    zoneKey: { type: String, index: true, default: '' },
+    zoneLabel: { type: String, default: '' },
     locationLat: { type: Number },
     locationLng: { type: Number },
     updatedReportCount: { type: Number, default: 0 },
@@ -132,6 +136,16 @@ function getRiskByCount(count) {
   return { label: 'Baja incidencia', level: 'low', color: '#2E7D32' };
 }
 
+function getZoneKeyFromCoordinates(lat, lng) {
+  const bucketLat = Math.round(Number(lat) * 200) / 200;
+  const bucketLng = Math.round(Number(lng) * 200) / 200;
+  return `${bucketLat}:${bucketLng}`;
+}
+
+function getZoneLabelForReport(report) {
+  return String(report.zoneLabel || report.locationText || report.title || 'Zona prioritaria').trim();
+}
+
 function haversineDistanceMeters(lat1, lng1, lat2, lng2) {
   const toRadians = (value) => (value * Math.PI) / 180;
   const earthRadius = 6371000;
@@ -159,6 +173,7 @@ async function createStatusNotification(report, status) {
 
 async function findReportsInZone(lat, lng, radiusMeters = 180) {
   const reports = await Report.find({ category: 'bache', status: { $ne: 'Finalizado' } }).lean();
+  const zoneKey = getZoneKeyFromCoordinates(lat, lng);
 
   return reports.filter((report) => {
     const reportLat = report.coordinates?.lat;
@@ -167,7 +182,8 @@ async function findReportsInZone(lat, lng, radiusMeters = 180) {
       return false;
     }
 
-    return haversineDistanceMeters(lat, lng, reportLat, reportLng) <= radiusMeters;
+    const matchesExistingZone = report.zoneKey && report.zoneKey === zoneKey;
+    return matchesExistingZone || haversineDistanceMeters(lat, lng, reportLat, reportLng) <= radiusMeters;
   });
 }
 
@@ -181,16 +197,16 @@ async function buildRiskZones() {
     const lng = report.coordinates?.lng;
     if (typeof lat !== 'number' || typeof lng !== 'number') continue;
 
-    // Agrupación por cuadrante (~550m) para definir zonas de riesgo dinámicas
-    const cellLat = Math.round(lat * 200) / 200;
-    const cellLng = Math.round(lng * 200) / 200;
-    const key = `${cellLat}:${cellLng}`;
+    // Agrupación persistente por zona para mantener relación zona-bache.
+    const key = report.zoneKey || getZoneKeyFromCoordinates(lat, lng);
+    const label = getZoneLabelForReport(report);
 
-    // Track sum of lat/lng and count so we can compute centroid of reports
-    const current = buckets.get(key) || { latSum: 0, lngSum: 0, count: 0 };
+    // Track sum of lat/lng and count so we can compute centroid of reports.
+    const current = buckets.get(key) || { latSum: 0, lngSum: 0, count: 0, label };
     current.latSum += lat;
     current.lngSum += lng;
     current.count += 1;
+    current.label = current.label || label;
     buckets.set(key, current);
   }
 
@@ -206,10 +222,11 @@ async function buildRiskZones() {
         const avgLng = bucket.lngSum / bucket.count;
         return {
           id: `zone-${index + 1}`,
+          key: bucket.key,
           point: { lat: avgLat, lng: avgLng },
           reports: bucket.count,
           radius,
-          label: risk.label,
+          label: bucket.label || risk.label,
           riskLevel: risk.level,
           color: risk.color,
         };
@@ -299,6 +316,8 @@ app.post('/reports', async (req, res) => {
       lat: Number(resolvedLat),
       lng: Number(resolvedLng),
     },
+    zoneKey: getZoneKeyFromCoordinates(resolvedLat, resolvedLng),
+    zoneLabel: resolvedLocationText,
     userName: userName || 'Ciudadano',
     userPhone: String(userPhone || '').trim(),
   });
@@ -363,6 +382,9 @@ app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
 
   const parsedLat = locationLat != null && locationLat !== '' ? Number(locationLat) : null;
   const parsedLng = locationLng != null && locationLng !== '' ? Number(locationLng) : null;
+  const feedZoneKey = Number.isFinite(parsedLat) && Number.isFinite(parsedLng)
+    ? getZoneKeyFromCoordinates(parsedLat, parsedLng)
+    : '';
   let updatedReportIds = [];
 
   if (Number.isFinite(parsedLat) && Number.isFinite(parsedLng)) {
@@ -372,7 +394,7 @@ app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
     if (updatedReportIds.length > 0) {
       await Report.updateMany(
         { reportId: { $in: updatedReportIds } },
-        { $set: { status: 'Finalizado', updatedAt: new Date() } }
+        { $set: { status: 'Finalizado', updatedAt: new Date(), zoneKey: feedZoneKey, zoneLabel: locationText } }
       );
 
       await Promise.all(zoneReports.map((report) => createStatusNotification(report, 'Finalizado')));
@@ -390,6 +412,8 @@ app.post('/feed', authAdmin, upload.array('photos', 5), async (req, res) => {
     title,
     description,
     locationText,
+    zoneKey: feedZoneKey,
+    zoneLabel: locationText,
     locationLat: Number.isFinite(parsedLat) ? parsedLat : undefined,
     locationLng: Number.isFinite(parsedLng) ? parsedLng : undefined,
     updatedReportCount: updatedReportIds.length,
