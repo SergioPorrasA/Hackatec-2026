@@ -78,7 +78,7 @@ class _StatusViewState extends State<StatusView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Seguimiento de Reportes',
+                'Estado de reportes',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF670024),
@@ -86,7 +86,12 @@ class _StatusViewState extends State<StatusView> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Consulta el estado actual de tus peticiones ciudadanas.',
+                'Consulta si tu reporte fue enviado, está en revisión o ya quedó finalizado.',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Las tarjetas muestran cada incidencia para que no se pierda el seguimiento.',
                 style: TextStyle(color: Colors.grey[600]),
               ),
               const SizedBox(height: 24),
@@ -163,7 +168,7 @@ class _StatusViewState extends State<StatusView> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.2),
+                  color: statusColor.withAlpha(51),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -193,6 +198,11 @@ class _StatusViewState extends State<StatusView> {
                     Text(
                       report['location']!,
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Estado actual del sistema de atención municipal',
+                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                     ),
                   ],
                 ),

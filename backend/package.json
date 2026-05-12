@@ -1,0 +1,23 @@
+{
+  "name": "oaxaca-reporta-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Oaxaca Reporta",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "oaxaca",
+    "reporta",
+    "api",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2"
+  }
+}

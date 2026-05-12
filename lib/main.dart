@@ -69,7 +69,11 @@ class _MainAppState extends State<MainApp> {
             label: 'Map',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle),
+            icon: Icon(Icons.add_circle_outline),
+            activeIcon: Icon(
+              Icons.add_circle,
+              size: 30,
+            ),
             label: 'Report',
           ),
           BottomNavigationBarItem(

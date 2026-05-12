@@ -33,9 +33,10 @@ class _FeedViewState extends State<FeedView> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,children: [
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              'ACTUALIZACIONES CIVILES',
+              'NOTICIAS DE REPARACIÓN',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -45,7 +46,7 @@ class _FeedViewState extends State<FeedView> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Mural de Transformación',
+              'Baches atendidos y publicados por la comunidad',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF670024),
@@ -53,7 +54,7 @@ class _FeedViewState extends State<FeedView> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Visualiza el progreso de nuestra ciudad. Cada reporte finalizado representa una calle más segura para las familias oaxaqueñas.',
+              'Cada publicación muestra ubicación, fotografías y una breve descripción del bache reparado para dar seguimiento a lo que ya fue atendido.',
               style: TextStyle(color: Colors.grey[700]),
             ),
             const SizedBox(height: 16),
@@ -64,7 +65,7 @@ class _FeedViewState extends State<FeedView> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                'Total: 1,248 reparaciones',
+                'Publicaciones verificadas: 1,248',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF670024),
@@ -73,24 +74,27 @@ class _FeedViewState extends State<FeedView> {
             ),
             const SizedBox(height: 24),
             _buildReportCard(
-              title: 'San Felipe del Agua - Av. Principal',
+              title: 'Bache reparado en San Felipe del Agua',
               time: 'Hace 2 horas',
-              description: 'Se concluyó la rehabilitación integral del tramo afectado por filtraciones.',
-              image: Icons.check_circle,
+              description: 'Reparación concluida sobre Av. Principal, con nivelación completa y sellado final.',
+              image: Icons.location_on,
+              location: 'San Felipe del Agua · Av. Principal',
             ),
             const SizedBox(height: 16),
             _buildReportCard(
-              title: 'Colonia Reforma',
+              title: 'Intervención finalizada en Colonia Reforma',
               time: 'Hace 1 día',
-              description: 'Intervención rápida en Calle Heróica Escuela Naval Militar.',
-              image: Icons.construction,
+              description: 'Se rehabilitó el tramo reportado y se documentó con fotografías del antes y después.',
+              image: Icons.location_on,
+              location: 'Colonia Reforma · Calle Heroica Escuela Naval Militar',
             ),
             const SizedBox(height: 16),
             _buildReportCard(
-              title: 'Centro Histórico',
+              title: 'Centro Histórico sin bache activo',
               time: 'Hace 2 días',
-              description: 'Calle Macedonio Alcalá - Nivelación de grietas.',
-              image: Icons.done_all,
+              description: 'La calle fue reparada y quedó marcada como atendida en el sistema de seguimiento.',
+              image: Icons.location_on,
+              location: 'Centro Histórico · Calle Macedonio Alcalá',
             ),
           ],
         ),
@@ -103,6 +107,7 @@ class _FeedViewState extends State<FeedView> {
     required String time,
     required String description,
     required IconData image,
+    required String location,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -132,7 +137,61 @@ class _FeedViewState extends State<FeedView> {
             ],
           ),
           const SizedBox(height: 12),
+          Text(
+            location,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF670024),
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(description, style: TextStyle(color: Colors.grey[700])),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 74,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F1EC),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.photo, color: Color(0xFF670024)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  height: 74,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F1EC),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.photo_library, color: Color(0xFF670024)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  height: 74,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F1EC),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.image, color: Color(0xFF670024)),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           GestureDetector(
             onTap: () {},

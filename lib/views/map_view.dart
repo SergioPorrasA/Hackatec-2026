@@ -1,4 +1,7 @@
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class MapView extends StatefulWidget {
   const MapView({super.key});
@@ -8,6 +11,54 @@ class MapView extends StatefulWidget {
 }
 
 class _MapViewState extends State<MapView> {
+  final LatLng _center = const LatLng(17.0732, -96.7266);
+  final MapController _mapController = MapController();
+  double _zoom = 13.2;
+
+  final List<_IncidentZone> _zones = const [
+    _IncidentZone(
+      label: 'Alta incidencia',
+      color: Color(0xFFC62828),
+      point: LatLng(17.0708, -96.7228),
+      reports: 14,
+      area: 'Av. Independencia & Morelos',
+    ),
+    _IncidentZone(
+      label: 'Incidencia media',
+      color: Color(0xFFF9A825),
+      point: LatLng(17.0743, -96.7301),
+      reports: 7,
+      area: 'Centro Histórico',
+    ),
+    _IncidentZone(
+      label: 'Baja incidencia',
+      color: Color(0xFF2E7D32),
+      point: LatLng(17.0791, -96.7246),
+      reports: 2,
+      area: 'Colonia Reforma',
+    ),
+  ];
+
+  void _zoomIn() {
+    setState(() {
+      _zoom += 1;
+      _mapController.move(_center, _zoom);
+    });
+  }
+
+  void _zoomOut() {
+    setState(() {
+      _zoom = _zoom - 1 < 3 ? 3 : _zoom - 1;
+      _mapController.move(_center, _zoom);
+    });
+  }
+
+  void _recenter() {
+    setState(() {
+      _mapController.move(_center, _zoom);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,38 +83,73 @@ class _MapViewState extends State<MapView> {
       ),
       body: Stack(
         children: [
-          // Placeholder para el mapa
-          Container(
-            color: Colors.grey[300],
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.map,
-                    size: 80,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Mapa Interactivo',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Consulta todos los reportes activos\ny finalizados en la zona',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _center,
+              initialZoom: _zoom,
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.all,
+                scrollWheelVelocity: 0.01,
               ),
             ),
+            children: [
+              TileLayer(
+                // MapTiler streets tiles using provided API key
+                urlTemplate: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=vho6orZjGT63tDnxKRLq',
+                userAgentPackageName: 'com.example.baches_app',
+              ),
+              CircleLayer(
+                circles: _zones
+                    .map(
+                      (zone) => CircleMarker(
+                        point: zone.point,
+                        radius: 120,
+                        color: zone.color.withAlpha(48),
+                        borderColor: zone.color,
+                        borderStrokeWidth: 2,
+                      ),
+                    )
+                    .toList(),
+              ),
+              MarkerLayer(
+                markers: _zones
+                    .map(
+                      (zone) => Marker(
+                        point: zone.point,
+                        width: 60,
+                        height: 60,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(999),
+                                boxShadow: [
+                                  BoxShadow(color: const Color.fromRGBO(0, 0, 0, 0.15), blurRadius: 8),
+                                ],
+                              ),
+                              child: Text(
+                                '${zone.reports}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: zone.color,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Icon(Icons.location_pin, color: zone.color, size: 36),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
           ),
-          // Leyenda flotante
           Positioned(
             top: 16,
             left: 16,
@@ -74,25 +160,24 @@ class _MapViewState extends State<MapView> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)
+                  BoxShadow(color: const Color.fromRGBO(0, 0, 0, 0.1), blurRadius: 8)
                 ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Densidad de Baches',
+                    'Referencia de incidencia',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  _buildLegendItem(Colors.red, 'Crítico (Alta)'),
-                  _buildLegendItem(Colors.pink, 'Moderado'),
-                  _buildLegendItem(Colors.grey, 'Baja (Seguro)'),
+                  _buildLegendItem(const Color(0xFFC62828), 'Rojo · Alta incidencia'),
+                  _buildLegendItem(const Color(0xFFF9A825), 'Amarillo · Incidencia media'),
+                  _buildLegendItem(const Color(0xFF2E7D32), 'Verde · Baja incidencia'),
                 ],
               ),
             ),
           ),
-          // Botones flotantes
           Positioned(
             right: 16,
             bottom: 100,
@@ -100,108 +185,28 @@ class _MapViewState extends State<MapView> {
               children: [
                 FloatingActionButton(
                   mini: true,
-                  onPressed: () {},
+                  onPressed: _zoomIn,
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.add, color: Color(0xFF670024)),
                 ),
                 const SizedBox(height: 8),
                 FloatingActionButton(
                   mini: true,
-                  onPressed: () {},
+                  onPressed: _zoomOut,
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.remove, color: Color(0xFF670024)),
                 ),
                 const SizedBox(height: 8),
                 FloatingActionButton(
                   mini: true,
-                  onPressed: () {},
+                  onPressed: _recenter,
                   backgroundColor: const Color(0xFF670024),
                   child: const Icon(Icons.my_location, color: Colors.white),
                 ),
               ],
             ),
           ),
-          // Alerta crítica
-          Positioned(
-            bottom: 100,
-            left: 16,
-            right: 56,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF3E0),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'SECTOR REFORMA - Alerta Crítica ⚠️',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF670024),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Av. Independencia & Morelos',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '14 baches reportados en los últimos 7 días',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Pendiente',
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                            ),
-                            const Text(
-                              '124',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Reportes',
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                            ),
-                            const Text(
-                              '14',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Removed bottom info window so map shows full screen per user request.
         ],
       ),
     );
@@ -227,3 +232,21 @@ class _MapViewState extends State<MapView> {
     );
   }
 }
+
+class _IncidentZone {
+  const _IncidentZone({
+    required this.label,
+    required this.color,
+    required this.point,
+    required this.reports,
+    required this.area,
+  });
+
+  final String label;
+  final Color color;
+  final LatLng point;
+  final int reports;
+  final String area;
+}
+
+
