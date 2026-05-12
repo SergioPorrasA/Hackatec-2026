@@ -15,18 +15,26 @@ class ApiService {
   ];
 
   static List<String> get _baseUrls {
+    final urls = <String>[];
+
     if (configuredBaseUrl.isNotEmpty) {
-      return [configuredBaseUrl];
+      urls.add(configuredBaseUrl);
     }
 
     if (Platform.isIOS) {
-      return const ['http://127.0.0.1:3000', 'http://localhost:3000'];
+      urls.addAll(const ['http://127.0.0.1:3000', 'http://localhost:3000']);
+    } else {
+      urls.addAll(_fallbackBaseUrls);
     }
 
-    return _fallbackBaseUrls;
+    return urls.toSet().toList();
   }
 
   static String get baseUrl => _baseUrls.first;
+
+  static String _connectionHint() {
+    return 'Verifica que el backend esté corriendo y, si usas un teléfono físico, ejecuta adb reverse tcp:3000 tcp:3000 o configura BACKEND_URL con la IP de tu PC.';
+  }
 
   static Future<http.Response> _getWithFallback(
     String path, {
@@ -37,7 +45,9 @@ class ApiService {
     for (final baseUrl in _baseUrls) {
       try {
         final uri = Uri.parse('$baseUrl$path').replace(
-          queryParameters: query?.map((key, value) => MapEntry(key, value.toString())),
+          queryParameters: query?.map(
+            (key, value) => MapEntry(key, value.toString()),
+          ),
         );
         return await http.get(uri).timeout(const Duration(seconds: 8));
       } catch (error) {
@@ -45,7 +55,9 @@ class ApiService {
       }
     }
 
-    throw Exception('No se pudo conectar al backend: $lastError');
+    throw Exception(
+      'No se pudo conectar al backend: $lastError. ${_connectionHint()}',
+    );
   }
 
   static Future<http.Response> _postWithFallback(
@@ -66,7 +78,9 @@ class ApiService {
       }
     }
 
-    throw Exception('No se pudo conectar al backend: $lastError');
+    throw Exception(
+      'No se pudo conectar al backend: $lastError. ${_connectionHint()}',
+    );
   }
 
   static Future<List<Map<String, dynamic>>> getReports({String? status}) async {
@@ -147,7 +161,19 @@ class ApiService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('No se pudo iniciar sesión');
+      String message = 'No se pudo iniciar sesión';
+      try {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic> && decoded['message'] is String) {
+          message = decoded['message'] as String;
+        }
+      } catch (_) {
+        if (response.body.trim().isNotEmpty) {
+          message = response.body.trim();
+        }
+      }
+
+      throw Exception('$message (HTTP ${response.statusCode})');
     }
 
     return jsonDecode(response.body) as Map<String, dynamic>;

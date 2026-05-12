@@ -176,7 +176,7 @@
         </div>
       </div>
       <div class="flex items-center gap-stack-lg">
-        <button
+        <button id="generatePdfBtn"
           class="flex items-center gap-stack-sm px-4 py-2 bg-white/10 text-white rounded-lg font-label-md hover:bg-white/20 transition-opacity">
           <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
           Generar Reporte PDF
@@ -272,67 +272,59 @@
           </div>
         </div>
       </div>
-      <!-- Middle Charts Section -->
+      <!-- Middle Section -->
       <div class="grid grid-cols-12 gap-stack-lg mb-stack-lg">
-        <!-- Detailed Analytics Chart -->
+        <!-- Location Summary Table -->
         <div class="col-span-12 lg:col-span-8 bg-white p-stack-lg rounded-xl border border-outline-variant">
           <div class="flex justify-between items-center mb-stack-lg">
-            <h3 class="font-h3 text-h3 text-on-surface">Volumen de Reportes Semanales</h3>
-            <div class="flex items-center gap-stack-md">
-              <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-full bg-primary"></span>
-                <span class="text-label-md font-label-md text-on-surface-variant">Reportados</span>
+            <h3 class="font-h3 text-h3 text-on-surface">Resumen por Colonia</h3>
+            <p class="font-body-md text-on-surface-variant">Agrupación por colonia y cercanía</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md mb-stack-md">
+            <div class="bg-surface-container-low rounded-lg p-stack-md border border-outline-variant">
+              <p class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wide mb-2">Bacheados</p>
+              <div class="flex items-end justify-between mb-2">
+                <span id="bacheadosPercent" class="font-h2 text-h2 text-on-surface">0%</span>
+                <span id="bacheadosCount" class="text-body-md text-on-surface-variant">0</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-full bg-tertiary-container"></span>
-                <span class="text-label-md font-label-md text-on-surface-variant">Arreglados</span>
+              <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                <div id="bacheadosBar" class="h-full bg-tertiary" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="bg-surface-container-low rounded-lg p-stack-md border border-outline-variant">
+              <p class="text-label-md font-label-md text-on-surface-variant uppercase tracking-wide mb-2">No bacheados
+              </p>
+              <div class="flex items-end justify-between mb-2">
+                <span id="noBacheadosPercent" class="font-h2 text-h2 text-on-surface">0%</span>
+                <span id="noBacheadosCount" class="text-body-md text-on-surface-variant">0</span>
+              </div>
+              <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                <div id="noBacheadosBar" class="h-full bg-error" style="width: 0%"></div>
               </div>
             </div>
           </div>
-          <div class="h-[300px] flex items-end justify-between gap-4 px-4">
-            <!-- Dummy Bar Chart -->
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[70%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[55%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Lun</span>
+          <div class="mb-stack-md flex items-center gap-stack-md">
+            <div id="bacheoDonutChart" class="w-20 h-20 rounded-full border border-outline-variant bg-surface-container"
+              style="background: conic-gradient(#2e7d32 0deg, #2e7d32 0deg, #ba1a1a 0deg, #ba1a1a 360deg);"></div>
+            <div>
+              <p class="font-body-md text-on-surface">Porcentaje de atención</p>
+              <p id="bacheoDonutLabel" class="text-[12px] text-on-surface-variant">Bacheados 0% | No bacheados 0%</p>
             </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[85%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[75%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Mar</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[60%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[60%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Mie</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[95%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[80%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Jue</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[80%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[85%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Vie</span>
-            </div>
-            <div class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex justify-center gap-1 h-full items-end">
-                <div class="bg-primary-container w-4 h-[40%] rounded-t-sm"></div>
-                <div class="bg-tertiary-container w-4 h-[35%] rounded-t-sm"></div>
-              </div>
-              <span class="text-label-md font-label-md text-on-surface-variant">Sab</span>
-            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="bg-surface-container-low border-b border-outline-variant">
+                  <th class="px-stack-lg py-4 font-label-md text-label-md text-on-surface-variant">COLONIA</th>
+                  <th class="px-stack-lg py-4 font-label-md text-label-md text-on-surface-variant">NÚMERO DE BACHES</th>
+                </tr>
+              </thead>
+              <tbody id="locationSummaryBody" class="divide-y divide-outline-variant"></tbody>
+            </table>
+          </div>
+          <div class="mt-stack-sm">
+            <p class="text-[12px] text-on-surface-variant">Se agrupan reportes cercanos para evitar duplicados por zona.
+            </p>
           </div>
         </div>
         <!-- Map Summary / Zone Chart -->
@@ -494,11 +486,367 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
     <script>
       const apiBase = 'http://localhost:3000';
       const tableBody = document.getElementById('reportsTableBody');
       const mapTilerKey = 'vho6orZjGT63tDnxKRLq';
       const reportsMapStatus = document.getElementById('reportsMapStatus');
+      const generatePdfBtn = document.getElementById('generatePdfBtn');
+      const locationSummaryBody = document.getElementById('locationSummaryBody');
+      const bacheadosPercent = document.getElementById('bacheadosPercent');
+      const noBacheadosPercent = document.getElementById('noBacheadosPercent');
+      const bacheadosCount = document.getElementById('bacheadosCount');
+      const noBacheadosCount = document.getElementById('noBacheadosCount');
+      const bacheadosBar = document.getElementById('bacheadosBar');
+      const noBacheadosBar = document.getElementById('noBacheadosBar');
+      const bacheoDonutChart = document.getElementById('bacheoDonutChart');
+      const bacheoDonutLabel = document.getElementById('bacheoDonutLabel');
+      let currentReports = [];
+
+      function normalizeLocation(value) {
+        return String(value || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      function extractColonia(locationText) {
+        const raw = String(locationText || '').trim();
+        if (!raw) return 'Sin colonia';
+
+        const segments = raw.split(',').map((segment) => segment.trim()).filter(Boolean);
+        const coloniaSegment = segments.find((segment) => /\bcol\.?\b|\bcolonia\b/i.test(segment));
+
+        if (coloniaSegment) {
+          return coloniaSegment.replace(/\bcol\.?\b|\bcolonia\b/ig, '').replace(/\s+/g, ' ').trim() || 'Sin colonia';
+        }
+
+        if (segments.length >= 2) {
+          return segments[1];
+        }
+
+        return segments[0] || 'Sin colonia';
+      }
+
+      function resolvePriorityByCount(count) {
+        if (count > 10) {
+          return {
+            key: 'critica',
+            label: 'Crítica',
+            chipClass: 'bg-error text-on-error',
+            color: '#ba1a1a',
+          };
+        }
+
+        if (count >= 5) {
+          return {
+            key: 'media',
+            label: 'Media',
+            chipClass: 'bg-yellow-200 text-yellow-900',
+            color: '#f9a825',
+          };
+        }
+
+        return {
+          key: 'baja',
+          label: 'Baja',
+          chipClass: 'bg-green-200 text-green-900',
+          color: '#2e7d32',
+        };
+      }
+
+      function buildColoniaGroups(reports) {
+        const groups = new Map();
+
+        reports.forEach((report, index) => {
+          const reportId = String(report.id || report._id || `idx-${index}`);
+          const locationText = String(report.location || report.locationText || 'Sin ubicación').trim() || 'Sin ubicación';
+          const colonia = extractColonia(locationText);
+          const normalizedColonia = normalizeLocation(colonia) || 'sin colonia';
+
+          const lat = Number(report.coordinates?.lat ?? report.lat);
+          const lng = Number(report.coordinates?.lng ?? report.lng);
+          const hasCoordinates = Number.isFinite(lat) && Number.isFinite(lng);
+
+          const gridLat = hasCoordinates ? Math.round(lat * 200) / 200 : 'na';
+          const gridLng = hasCoordinates ? Math.round(lng * 200) / 200 : 'na';
+          const key = `${normalizedColonia}:${gridLat}:${gridLng}`;
+
+          if (!groups.has(key)) {
+            groups.set(key, {
+              key,
+              colonia,
+              sampleLocation: locationText,
+              count: 0,
+              reportIds: [],
+              statusCounts: { enviado: 0, revision: 0, finalizado: 0 },
+              latSum: 0,
+              lngSum: 0,
+              coordCount: 0,
+            });
+          }
+
+          const current = groups.get(key);
+          current.count += 1;
+          current.reportIds.push(reportId);
+
+          const status = String(report.status || '').toLowerCase();
+          if (status.includes('finalizado')) current.statusCounts.finalizado += 1;
+          else if (status.includes('revisión') || status.includes('revision')) current.statusCounts.revision += 1;
+          else current.statusCounts.enviado += 1;
+
+          if (hasCoordinates) {
+            current.latSum += lat;
+            current.lngSum += lng;
+            current.coordCount += 1;
+          }
+        });
+
+        return Array.from(groups.values()).map((group) => ({
+          ...group,
+          lat: group.coordCount ? group.latSum / group.coordCount : null,
+          lng: group.coordCount ? group.lngSum / group.coordCount : null,
+        }));
+      }
+
+      function getDominantStatus(statusCounts) {
+        if (!statusCounts) return 'Sin estado';
+        const entries = [
+          ['Finalizado', statusCounts.finalizado || 0],
+          ['En Revisión', statusCounts.revision || 0],
+          ['Enviado', statusCounts.enviado || 0],
+        ];
+        entries.sort((a, b) => b[1] - a[1]);
+        return entries[0][0];
+      }
+
+      function renderLocationSummary(reports) {
+        const groups = buildColoniaGroups(reports)
+          .sort((a, b) => b.count - a.count || a.colonia.localeCompare(b.colonia));
+
+        const rows = groups
+          .map((group) => `
+            <tr class="hover:bg-surface-container-lowest transition-colors">
+              <td class="px-stack-lg py-4 font-body-md text-on-surface">${group.colonia}</td>
+              <td class="px-stack-lg py-4 font-data-mono text-data-mono">${group.count}</td>
+            </tr>
+          `)
+          .join('');
+
+        locationSummaryBody.innerHTML = rows || `
+          <tr>
+            <td colspan="2" class="px-stack-lg py-4 text-on-surface-variant">Sin reportes disponibles</td>
+          </tr>
+        `;
+      }
+
+      function renderBacheoChart(reports) {
+        const total = reports.length;
+        const repaired = reports.filter((report) => String(report.status || '').toLowerCase().includes('finalizado')).length;
+        const pending = Math.max(0, total - repaired);
+
+        const repairedPercent = total ? Math.round((repaired / total) * 100) : 0;
+        const pendingPercent = total ? 100 - repairedPercent : 0;
+
+        bacheadosPercent.textContent = `${repairedPercent}%`;
+        noBacheadosPercent.textContent = `${pendingPercent}%`;
+        bacheadosCount.textContent = `${repaired} casos`;
+        noBacheadosCount.textContent = `${pending} casos`;
+        bacheadosBar.style.width = `${repairedPercent}%`;
+        noBacheadosBar.style.width = `${pendingPercent}%`;
+
+        const repairedDeg = Math.round((repairedPercent / 100) * 360);
+        bacheoDonutChart.style.background = `conic-gradient(#2e7d32 0deg, #2e7d32 ${repairedDeg}deg, #ba1a1a ${repairedDeg}deg, #ba1a1a 360deg)`;
+        bacheoDonutLabel.textContent = `Bacheados ${repairedPercent}% | No bacheados ${pendingPercent}%`;
+      }
+
+      function drawPdfCharts(doc, reports, coloniaGroups) {
+        const total = reports.length;
+        const repaired = reports.filter((report) => String(report.status || '').toLowerCase().includes('finalizado')).length;
+        const pending = Math.max(0, total - repaired);
+        const repairedPercent = total ? Math.round((repaired / total) * 100) : 0;
+        const pendingPercent = total ? 100 - repairedPercent : 0;
+
+        const priorityTotals = { critica: 0, media: 0, baja: 0 };
+        coloniaGroups.forEach((group) => {
+          const priority = resolvePriorityByCount(group.count);
+          priorityTotals[priority.key] += 1;
+        });
+
+        const groupCount = coloniaGroups.length || 1;
+        const priorityPercents = {
+          critica: Math.round((priorityTotals.critica / groupCount) * 100),
+          media: Math.round((priorityTotals.media / groupCount) * 100),
+          baja: Math.round((priorityTotals.baja / groupCount) * 100),
+        };
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text(`Bacheados: ${repairedPercent}% (${repaired})`, 14, 38);
+        doc.text(`No bacheados: ${pendingPercent}% (${pending})`, 14, 43);
+
+        const barX = 14;
+        const barY = 46;
+        const barW = 120;
+        const barH = 6;
+        doc.setFillColor(230, 230, 230);
+        doc.rect(barX, barY, barW, barH, 'F');
+        doc.setFillColor(46, 125, 50);
+        doc.rect(barX, barY, (barW * repairedPercent) / 100, barH, 'F');
+        doc.setFillColor(186, 26, 26);
+        doc.rect(barX + (barW * repairedPercent) / 100, barY, (barW * pendingPercent) / 100, barH, 'F');
+
+        const pX = 150;
+        const pY = 38;
+        const pW = 125;
+        const pH = 8;
+        doc.text('Prioridad por colonia (panel de control)', pX, 33);
+        doc.setFillColor(230, 230, 230);
+        doc.rect(pX, pY, pW, pH, 'F');
+
+        const criticaW = (pW * priorityPercents.critica) / 100;
+        const mediaW = (pW * priorityPercents.media) / 100;
+        const bajaW = (pW * priorityPercents.baja) / 100;
+
+        doc.setFillColor(186, 26, 26);
+        doc.rect(pX, pY, criticaW, pH, 'F');
+        doc.setFillColor(249, 168, 37);
+        doc.rect(pX + criticaW, pY, mediaW, pH, 'F');
+        doc.setFillColor(46, 125, 50);
+        doc.rect(pX + criticaW + mediaW, pY, bajaW, pH, 'F');
+
+        doc.setFontSize(8.5);
+        doc.text(`Crítica ${priorityPercents.critica}%`, pX, pY + 14);
+        doc.text(`Media ${priorityPercents.media}%`, pX + 35, pY + 14);
+        doc.text(`Baja ${priorityPercents.baja}%`, pX + 68, pY + 14);
+
+        return { priorityTotals };
+      }
+
+      async function generateReportsPdf() {
+        if (!currentReports.length) {
+          alert('No hay datos de baches para generar el PDF.');
+          return;
+        }
+
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          alert('No se pudo cargar el generador PDF.');
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+        const now = new Date();
+        const generatedAt = now.toLocaleString('es-MX', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
+        const groups = buildColoniaGroups(currentReports).sort((a, b) => b.count - a.count || a.colonia.localeCompare(b.colonia));
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(15);
+        doc.text('Reporte de baches agrupados por colonia', 14, 14);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(`Generado: ${generatedAt}`, 14, 20);
+        doc.text(`Total de reportes: ${currentReports.length}`, 14, 25);
+        doc.text(`Total de colonias agrupadas: ${groups.length}`, 14, 30);
+
+        const chartContext = drawPdfCharts(doc, currentReports, groups);
+
+        const legendX = 14;
+        const legendY = 56;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Simbología de colonias agrupadas', legendX, legendY);
+
+        const legendItems = [
+          { label: 'Crítica (>10 baches)', color: [186, 26, 26], total: chartContext.priorityTotals.critica },
+          { label: 'Media (5-10 baches)', color: [249, 168, 37], total: chartContext.priorityTotals.media },
+          { label: 'Baja (<5 baches)', color: [46, 125, 50], total: chartContext.priorityTotals.baja },
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        legendItems.forEach((item, idx) => {
+          const y = legendY + 8 + idx * 8;
+          doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+          doc.rect(legendX, y - 3.5, 4, 4, 'F');
+          doc.setTextColor(30, 30, 30);
+          doc.text(`${item.label}: ${item.total} colonias`, legendX + 6, y);
+        });
+
+        doc.setFontSize(9);
+        doc.text('Top colonias agrupadas:', legendX, legendY + 34);
+        groups.slice(0, 5).forEach((group, idx) => {
+          doc.text(`${idx + 1}. ${group.colonia} (${group.count})`, legendX, legendY + 41 + idx * 6);
+        });
+
+        const tableStartY = 88;
+
+        const bodyRows = groups.map((group, index) => {
+          const priority = resolvePriorityByCount(group.count);
+          return [
+            String(index + 1),
+            group.colonia,
+            group.sampleLocation,
+            String(group.count),
+            priority.label,
+            getDominantStatus(group.statusCounts),
+          ];
+        });
+
+        doc.autoTable({
+          startY: tableStartY,
+          head: [['#', 'Colonia', 'Referencia de ubicación', 'Baches agrupados', 'Prioridad', 'Estatus dominante']],
+          body: bodyRows,
+          styles: {
+            fontSize: 8.5,
+            cellPadding: 1.8,
+            overflow: 'linebreak',
+          },
+          headStyles: {
+            fillColor: [122, 9, 51],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+          },
+          alternateRowStyles: {
+            fillColor: [248, 249, 250],
+          },
+          columnStyles: {
+            0: { cellWidth: 8 },
+            1: { cellWidth: 45 },
+            2: { cellWidth: 95 },
+            3: { cellWidth: 28 },
+            4: { cellWidth: 22 },
+            5: { cellWidth: 38 },
+          },
+          didDrawPage: (data) => {
+            const pageCount = doc.internal.getNumberOfPages();
+            doc.setFontSize(8);
+            doc.text(
+              `Pagina ${data.pageNumber} de ${pageCount}`,
+              data.settings.margin.left,
+              doc.internal.pageSize.getHeight() - 5
+            );
+          },
+          margin: { top: 30, left: 10, right: 10, bottom: 10 },
+        });
+
+        doc.save(`reporte_baches_colonias_${now.toISOString().slice(0, 10)}.pdf`);
+      }
 
       const reportsGeoMap = L.map('reportsGeoMap', {
         zoomControl: false,
@@ -526,61 +874,47 @@
       async function loadReportsMapData() {
         try {
           const reportsResponse = await fetch(`${apiBase}/reports/map`);
-
           const reports = reportsResponse.ok ? await reportsResponse.json() : [];
+
           reportsLayerGroup.clearLayers();
           if (reportsHeatLayer) {
             reportsGeoMap.removeLayer(reportsHeatLayer);
             reportsHeatLayer = null;
           }
 
+          const groups = buildColoniaGroups(reports);
           let criticalCount = 0;
           let mediumCount = 0;
           let lowCount = 0;
-          const heatPoints = [];
+          const boundsPoints = [];
 
-          const priorityWeight = (incident) => {
-            const priority = String(incident.priority || '').toLowerCase();
-            if (priority === 'alta') return 1.0;
-            if (priority === 'media') return 0.65;
-            if (priority === 'baja') return 0.35;
+          groups.forEach((group) => {
+            if (typeof group.lat !== 'number' || typeof group.lng !== 'number') return;
 
-            const status = String(incident.status || '').toLowerCase();
-            if (status.includes('finalizado')) return 0.35;
-            if (status.includes('revisión') || status.includes('revision')) return 0.65;
-            return 1.0;
-          };
+            const priority = resolvePriorityByCount(group.count);
+            const marker = L.circleMarker([group.lat, group.lng], {
+              radius: Math.min(18, 6 + group.count),
+              color: priority.color,
+              fillColor: priority.color,
+              fillOpacity: 0.45,
+              weight: 2,
+            }).bindPopup(`<strong>${group.colonia}</strong><br>${group.count} baches agrupados<br>Prioridad ${priority.label}`);
 
-          reports.forEach((incident) => {
-            if (typeof incident.lat !== 'number' || typeof incident.lng !== 'number') return;
-            const weight = priorityWeight(incident);
-            heatPoints.push([incident.lat, incident.lng, weight]);
+            marker.addTo(reportsLayerGroup);
+            boundsPoints.push([group.lat, group.lng]);
 
-            if (weight >= 0.95) criticalCount += 1;
-            else if (weight >= 0.6) mediumCount += 1;
+            if (priority.key === 'critica') criticalCount += 1;
+            else if (priority.key === 'media') mediumCount += 1;
             else lowCount += 1;
           });
 
-          reportsHeatLayer = L.heatLayer(heatPoints, {
-            radius: 28,
-            blur: 22,
-            maxZoom: 18,
-            minOpacity: 0.25,
-            gradient: {
-              0.2: '#16a34a',
-              0.55: '#eab308',
-              1.0: '#ba1a1a'
-            }
-          }).addTo(reportsGeoMap);
-
-          if (heatPoints.length > 0) {
-            const bounds = L.latLngBounds(heatPoints.map((p) => [p[0], p[1]]));
-            reportsGeoMap.fitBounds(bounds.pad(0.15));
+          if (boundsPoints.length > 0) {
+            reportsGeoMap.fitBounds(L.latLngBounds(boundsPoints).pad(0.15));
           }
 
-          document.getElementById('reportsNorthCount').textContent = `${criticalCount} críticos`;
-          document.getElementById('reportsSouthCount').textContent = `${mediumCount + lowCount} no críticos`;
-          reportsMapStatus.textContent = `Heatmap activo (${reports.length} incidencias)`;
+          document.getElementById('reportsNorthCount').textContent = `${criticalCount} colonias críticas`;
+          document.getElementById('reportsSouthCount').textContent = `${mediumCount + lowCount} colonias media/baja`;
+          reportsMapStatus.textContent = `Mapa agrupado (${groups.length} colonias)`;
         } catch (error) {
           reportsMapStatus.textContent = 'No se pudo cargar el mapa';
           console.error('Error al cargar el mapa geográfico:', error);
@@ -590,18 +924,35 @@
       async function loadReports() {
         const response = await fetch(`${apiBase}/reports`);
         const reports = response.ok ? await response.json() : [];
+        currentReports = reports;
+        renderLocationSummary(reports);
+        renderBacheoChart(reports);
+
+        const groups = buildColoniaGroups(reports);
+        const groupByReportId = new Map();
+        groups.forEach((group) => {
+          group.reportIds.forEach((reportId) => {
+            groupByReportId.set(reportId, group);
+          });
+        });
 
         tableBody.innerHTML = reports.map((report) => {
           const safeId = String(report.id || '').replace(/"/g, '&quot;');
+          const reportId = String(report.id || report._id || '');
+          const group = groupByReportId.get(reportId);
+          const locationLabel = String(report.location || 'Sin ubicación').trim() || 'Sin ubicación';
+          const coloniaLabel = group?.colonia || extractColonia(locationLabel);
+          const priority = resolvePriorityByCount(group?.count || 1);
+
           return `
             <tr class="hover:bg-surface-container-lowest transition-colors">
               <td class="px-stack-lg py-4 font-data-mono text-data-mono">#${report.id}</td>
               <td class="px-stack-lg py-4">
-                <p class="font-body-md font-semibold">${report.location || 'Sin ubicación'}</p>
+                <p class="font-body-md font-semibold">${coloniaLabel}</p>
                 <p class="text-[12px] text-on-surface-variant">${report.title || 'Sin título'}</p>
               </td>
               <td class="px-stack-lg py-4">
-                <span class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full text-[11px] font-bold">MEDIA</span>
+                <span class="${priority.chipClass} px-3 py-1 rounded-full text-[11px] font-bold">${priority.label}</span>
               </td>
               <td class="px-stack-lg py-4">
                 <select data-id="${safeId}" class="status-select border border-outline-variant rounded px-2 py-1 text-sm">
@@ -632,9 +983,12 @@
               alert('No se pudo actualizar el estado');
             }
             await loadReports();
+            await loadReportsMapData();
           });
         });
       }
+
+      generatePdfBtn.addEventListener('click', generateReportsPdf);
 
       loadReportsMapData();
       loadReports();
