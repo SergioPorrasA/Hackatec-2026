@@ -26,12 +26,17 @@ class _StatusViewState extends State<StatusView> {
 
   Future<void> _loadReports() async {
     try {
-      final results = await Future.wait([
-        ApiService.getReports(),
-        ApiService.getNotifications(phone: widget.userPhone),
-      ]);
-      final reports = results[0];
-      final notifications = results[1];
+      final reports = await ApiService.getReports();
+      List<Map<String, dynamic>> notifications = [];
+
+      if (widget.userPhone.trim().isNotEmpty) {
+        try {
+          notifications = await ApiService.getNotifications(phone: widget.userPhone);
+        } catch (_) {
+          notifications = [];
+        }
+      }
+
       if (!mounted) return;
 
       setState(() {
@@ -150,19 +155,35 @@ class _StatusViewState extends State<StatusView> {
               if (_loading)
                 const Center(child: CircularProgressIndicator())
               else
-                ..._reports
-                    .where((report) {
-                      if (_selectedFilter == 0) return true;
-                      if (_selectedFilter == 1) return report['status'] == 'Enviado';
-                      if (_selectedFilter == 2) return report['status'] == 'En Revisión';
-                      return report['status'] == 'Finalizado';
-                    })
-                    .map((report) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildReportCard(report),
-                      );
-                    }),
+                if (_reports.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey[300]!),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Aún no hay reportes para mostrar.',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  )
+                else
+                  ..._reports
+                      .where((report) {
+                        if (_selectedFilter == 0) return true;
+                        if (_selectedFilter == 1) return report['status'] == 'Enviado';
+                        if (_selectedFilter == 2) return report['status'] == 'En Revisión';
+                        return report['status'] == 'Finalizado';
+                      })
+                      .map((report) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _buildReportCard(report),
+                        );
+                      })
+                      .toList(),
             ],
           ),
         ),
