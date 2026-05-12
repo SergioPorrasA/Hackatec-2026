@@ -209,8 +209,10 @@
               class="bg-surface p-2 rounded-lg shadow-sm border border-outline-variant material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high"
               data-icon="my_location">my_location</button>
           </div>
-          <div class="absolute top-stack-lg right-stack-lg z-10 status-chip bg-surface/90 p-3 rounded-xl border border-outline-variant shadow-md max-w-xs">
-            <p class="font-label-md text-[11px] text-on-surface-variant uppercase tracking-wide">Ubicación en tiempo real</p>
+          <div
+            class="absolute top-stack-lg right-stack-lg z-10 status-chip bg-surface/90 p-3 rounded-xl border border-outline-variant shadow-md max-w-xs">
+            <p class="font-label-md text-[11px] text-on-surface-variant uppercase tracking-wide">Ubicación en tiempo
+              real</p>
             <p id="gpsStatus" class="font-body-md text-[12px] text-on-surface mt-1">Inicializando GPS...</p>
           </div>
           <!-- Legend Overlay -->
@@ -246,7 +248,8 @@
               <div class="flex items-baseline gap-2">
                 <h2 class="font-h1 text-h1 text-primary-container"><span id="totalReports">—</span></h2>
                 <span class="text-error font-label-md text-[12px] flex items-center"><span
-                    class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> <span id="reportsDelta">+0%</span></span>
+                    class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span> <span
+                    id="reportsDelta">+0%</span></span>
               </div>
             </div>
             <div
@@ -260,59 +263,31 @@
               <p class="font-label-md text-on-surface-variant text-[10px] uppercase mt-1">En curso</p>
             </div>
           </div>
-          <!-- Alerts Section -->
+          <!-- Simbología -->
           <div>
             <div class="flex items-center justify-between mb-stack-md">
-              <h3 class="font-h3 text-h3 text-on-surface">Alertas Recientes</h3>
-              <button class="text-primary font-label-md text-[12px] hover:underline">Ver todas</button>
+              <h3 class="font-h3 text-h3 text-on-surface">Simbología</h3>
             </div>
             <div class="space-y-stack-md">
-              <!-- Alert Card 1 -->
               <div
-                class="flex gap-stack-md p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl hover:shadow-md transition-shadow">
-                <div
-                  class="flex-shrink-0 w-10 h-10 rounded-lg bg-error-container text-on-error-container flex items-center justify-center">
-                  <span class="material-symbols-outlined" data-icon="warning">warning</span>
-                </div>
-                <div class="flex-1">
-                  <div class="flex justify-between items-start mb-1">
-                    <h4 class="font-label-md text-on-surface text-[14px]">Emergencia Vial</h4>
-                    <span class="font-label-md text-[10px] text-on-surface-variant">Hace 5m</span>
-                  </div>
-                  <p class="font-body-md text-on-surface-variant text-[13px] leading-relaxed">Colapso de drenaje provoca
-                    bache crítico en Sector Reforma. Cuadrilla 04 desviada.</p>
+                class="flex items-center gap-3 p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl">
+                <span class="w-4 h-4 rounded-full bg-yellow-400 border border-yellow-500"></span>
+                <div>
+                  <p class="font-body-md">Prioridad Media</p>
                 </div>
               </div>
-              <!-- Alert Card 2 -->
               <div
-                class="flex gap-stack-md p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl hover:shadow-md transition-shadow">
-                <div
-                  class="flex-shrink-0 w-10 h-10 rounded-lg bg-tertiary-container/20 text-tertiary-container flex items-center justify-center">
-                  <span class="material-symbols-outlined" data-icon="engineering">engineering</span>
-                </div>
-                <div class="flex-1">
-                  <div class="flex justify-between items-start mb-1">
-                    <h4 class="font-label-md text-on-surface text-[14px]">Progreso de Obra</h4>
-                    <span class="font-label-md text-[10px] text-on-surface-variant">Hace 1h</span>
-                  </div>
-                  <p class="font-body-md text-on-surface-variant text-[13px] leading-relaxed">Cuadrilla 12 ha finalizado
-                    la reparación de 5 baches en la Calzada Madero.</p>
+                class="flex items-center gap-3 p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl">
+                <span class="w-4 h-4 rounded-full bg-emerald-600 border border-emerald-700"></span>
+                <div>
+                  <p class="font-body-md">Baja</p>
                 </div>
               </div>
-              <!-- Alert Card 3 -->
               <div
-                class="flex gap-stack-md p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl hover:shadow-md transition-shadow">
-                <div
-                  class="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
-                  <span class="material-symbols-outlined" data-icon="cloud">cloud</span>
-                </div>
-                <div class="flex-1">
-                  <div class="flex justify-between items-start mb-1">
-                    <h4 class="font-label-md text-on-surface text-[14px]">Aviso Climático</h4>
-                    <span class="font-label-md text-[10px] text-on-surface-variant">Hace 3h</span>
-                  </div>
-                  <p class="font-body-md text-on-surface-variant text-[13px] leading-relaxed">Probabilidad de lluvia
-                    80%. Se recomienda suspender mezclas asfálticas después de las 16:00.</p>
+                class="flex items-center gap-3 p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl">
+                <span class="w-4 h-4 rounded-full bg-error border border-error/90"></span>
+                <div>
+                  <p class="font-body-md">Crítico</p>
                 </div>
               </div>
             </div>

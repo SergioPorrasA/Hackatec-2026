@@ -118,11 +118,6 @@
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       }
 
-      .sidebar-active {
-        border-left: 4px solid #ffffff;
-        background-color: #7a0933;
-      }
-
       .card-urgent {
         border-top: 4px solid #ba1a1a;
       }
@@ -133,72 +128,60 @@
     </style>
   </head>
 
-  <body class="flex min-h-screen">
+  <body class="text-on-surface">
     <!-- SideNavBar Component -->
     <aside
-      class="fixed left-0 top-0 h-full w-sidebar-width bg-primary text-on-primary border-r border-outline-variant flex flex-col h-full pt-stack-lg pb-0 z-50">
+      class="fixed left-0 top-0 h-full w-sidebar-width bg-primary text-on-primary border-r border-outline-variant flex flex-col pt-stack-lg pb-0 z-50">
       <div class="px-margin-mobile mb-stack-lg">
         <h1 class="font-h3 text-h3 font-bold text-white">Oaxaca de Juárez</h1>
         <p class="font-body-md text-body-md text-white/70">Sistema de Mantenimiento Vial</p>
       </div>
-      <nav class="flex-grow">
-        <ul class="space-y-1">
-          <li>
-            <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
-              href="dashboard_mapa_de_incidencias.html">
-              <span class="material-symbols-outlined" data-icon="map">map</span>
-              <span class="font-label-md text-label-md">Panel de Control</span>
-            </a>
-          </li>
-          <li>
-            <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
-              href="reportes_ejecutivos.html">
-              <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
-              <span class="font-label-md text-label-md">Reportes</span>
-            </a>
-          </li>
-          <li>
-            <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
-              href="feed_de_actualizaciones.html">
-              <span class="material-symbols-outlined" data-icon="rss_feed">rss_feed</span>
-              <span class="font-label-md text-label-md">Actualizaciones</span>
-            </a>
-          </li>
-          <li>
-            <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md bg-primary text-on-primary border-l-4 border-on-primary-fixed scale-[0.99] transition-transform"
-              href="configuracion_del_sistema.html">
-              <span class="material-symbols-outlined" data-icon="settings">settings</span>
-              <span class="font-label-md text-label-md">Configuracion</span>
-            </a>
-          </li>
-        </ul>
+      <nav class="flex-1">
+        <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+          href="dashboard_mapa_de_incidencias.html">
+          <span class="material-symbols-outlined">map</span>
+          <span class="font-label-md text-label-md">Panel de Control</span>
+        </a>
+        <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+          href="reportes_ejecutivos.html">
+          <span class="material-symbols-outlined">analytics</span>
+          <span class="font-label-md text-label-md">Reportes</span>
+        </a>
+        <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md text-white/80 hover:bg-white/10 transition-all duration-200"
+          href="feed_de_actualizaciones.html">
+          <span class="material-symbols-outlined">rss_feed</span>
+          <span class="font-label-md text-label-md">Actualizaciones</span>
+        </a>
+        <a class="flex items-center gap-stack-md px-margin-mobile py-stack-md bg-primary text-on-primary border-l-4 border-on-primary-fixed scale-[0.99] transition-transform"
+          href="configuracion_del_sistema.html">
+          <span class="material-symbols-outlined">settings</span>
+          <span class="font-label-md text-label-md">Configuracion</span>
+        </a>
       </nav>
       <div class="mt-auto">
         <img alt="Gobierno de Oaxaca" class="block w-full max-w-[180px]" src="oaxacagob.png" />
       </div>
     </aside>
     <!-- Main Content Area -->
-    <main class="flex-grow ml-sidebar-width">
+    <main class="ml-[280px] pt-24 px-margin-desktop pb-margin-desktop min-h-screen">
       <!-- TopAppBar Component -->
       <header
-        class="fixed top-0 right-0 z-40 w-[calc(100%-280px)] h-16 bg-[#6b1834] text-white flex justify-between items-center px-margin-desktop border-b border-white/10">
-        <div class="flex items-center gap-stack-md">
-          <div class="relative">
+        class="fixed top-0 right-0 z-40 w-[calc(100%-280px)] h-16 bg-[#6b1834] text-white border-b border-white/10 flex justify-between items-center px-margin-desktop">
+        <div class="flex items-center gap-stack-md w-1/2">
+          <div class="relative w-full max-w-md">
             <span
               class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
             <input
-              class="pl-10 pr-4 py-2 bg-white/90 border border-white/30 rounded-lg font-body-md text-body-md w-64 focus:ring-2 focus:ring-white"
+              class="w-full pl-10 pr-4 py-2 bg-white/90 border border-white/30 rounded-lg font-body-md focus:ring-1 focus:ring-white focus:border-white outline-none"
               placeholder="Buscar en configuración..." type="text" />
           </div>
         </div>
         <div class="flex items-center gap-stack-lg">
-          <div class="flex items-center gap-4">
-            <button class="p-2 text-white/90 hover:bg-white/10 transition-colors rounded-full">
-              <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-            </button>
-            <button class="p-2 text-white/90 hover:bg-white/10 transition-colors rounded-full">
-              <span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
-            </button>
+          <div class="flex gap-stack-md">
+            <span
+              class="material-symbols-outlined text-white/90 cursor-pointer hover:bg-white/10 p-2 rounded-full transition-colors">notifications</span>
+            <span
+              class="material-symbols-outlined text-white/90 cursor-pointer hover:bg-white/10 p-2 rounded-full transition-colors">help_outline</span>
           </div>
           <div class="h-8 w-px bg-white/30"></div>
           <div class="flex items-center gap-stack-sm">
@@ -208,11 +191,11 @@
           </div>
         </div>
       </header>
-      <!-- Scrollable Content Canvas -->
-      <div class="mt-16 p-margin-desktop max-w-container-max mx-auto">
+      <!-- Page Content -->
+      <div class="max-w-container-max mx-auto">
         <!-- Page Header -->
         <div class="mb-stack-lg">
-          <h2 class="font-h1 text-h1 text-primary">Configuración del Sistema</h2>
+          <h2 class="font-h2 text-h2 text-primary">Configuración del Sistema</h2>
           <p class="font-body-lg text-body-lg text-on-surface-variant">Gestione las operaciones municipales, seguridad y
             parámetros de infraestructura.</p>
         </div>
